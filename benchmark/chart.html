@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Rivet Benchmark Results</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f8f9fa;
+            margin: 0;
+        }
+
+        .container {
+            width: 800px;
+            padding: 40px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        p {
+            color: #666;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Rivet vs The World</h1>
+        <p>Requests per Second (Higher is Better)</p>
+        <canvas id="benchmarkChart"></canvas>
+    </div>
+
+    <script>
+        const ctx = document.getElementById('benchmarkChart').getContext('2d');
+
+        // Data from COMPREHENSIVE_RESULTS.md
+        const data = {
+            labels: ['Simple JSON (/hello)', 'Dynamic Routes (/user/:id)'],
+            datasets: [
+                {
+                    label: 'Rivet (Dart)',
+                    data: [14334, 15696],
+                    backgroundColor: '#0175C2', // Flutter Blue
+                    borderColor: '#01579B',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Node.js',
+                    data: [30691, 9967],
+                    backgroundColor: '#339933', // Node Green
+                    borderColor: '#339933',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Express.js',
+                    data: [20571, 4674],
+                    backgroundColor: '#000000', // Express Black
+                    borderColor: '#000000',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Go (Gorilla)',
+                    data: [29201, 1120],
+                    backgroundColor: '#00ADD8', // Go Blue
+                    borderColor: '#00ADD8',
+                    borderWidth: 1
+                }
+            ]
+        };
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: data,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Rivet Performance Benchmark (Nov 2025)'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Requests / Second'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

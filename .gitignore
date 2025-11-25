@@ -1,0 +1,46 @@
+# Dart
+.dart_tool/
+.packages
+build/
+pubspec.lock
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# Compiled binaries
+*.exe
+*.so
+*.dylib
+benchmark/rivet_cluster
+benchmark/framework_cluster
+benchmark/rivet_single
+
+# OS
+.DS_Store
+Thumbs.db
+.directory
+
+# Logs
+*.log
+
+# Test
+coverage/
+.test_coverage.dart
+
+# Temporary
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Node (for benchmark comparison servers)
+node_modules/
+package-lock.json
+
+# Gemini artifacts (don't publish these)
+.gemini/
