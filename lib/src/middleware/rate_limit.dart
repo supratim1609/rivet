@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import '../http/request.dart';
 import '../http/response.dart';
 import 'middleware.dart';

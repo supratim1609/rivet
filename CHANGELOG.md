@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.1
+
+- **Improvements**:
+  - Added disclaimer to differentiate from rivet.dev (TypeScript framework)
+  - Fixed repository URL verification for pub.dev
+  - Removed all unused imports (21 fixes)
+  - Updated analyzer dependency to ^7.0.0
+  - Corrected performance claims (1.8x faster than Express)
+  - Added homepage field to pubspec.yaml
+
 ## 1.0.0
 
 - **Initial Release** 🎉

@@ -4,7 +4,7 @@ import 'dart:io';
 class WorkerPool {
   final int workerCount;
   final List<HttpServer> _servers = [];
-  int _currentWorker = 0;
+  final int _currentWorker = 0;
 
   WorkerPool({int? workerCount}) : workerCount = workerCount ?? Platform.numberOfProcessors;
 

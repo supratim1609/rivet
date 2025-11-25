@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:isolate';
 
 /// Manages a cluster of worker isolates for multi-core performance.

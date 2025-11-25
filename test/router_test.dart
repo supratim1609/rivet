@@ -1,6 +1,5 @@
 import 'package:test/test.dart';
 import 'package:rivet/src/router/router.dart';
-import 'package:rivet/src/router/tree.dart';
 
 void main() {
   group('Router', () {

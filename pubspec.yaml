@@ -1,6 +1,7 @@
 name: rivet
 description: A high-performance, type-safe, full-stack web framework for Dart with built-in JWT, WebSockets, and Admin Panel.
-version: 1.0.0
+version: 1.0.1
+homepage: https://github.com/supratim1609/rivet
 repository: https://github.com/supratim1609/rivet
 
 environment:
@@ -17,7 +18,7 @@ dependencies:
   postgres: ^3.5.9
   watcher: ^1.1.4
   args: ^2.4.0
-  analyzer: ^6.0.0
+  analyzer: ^7.0.0
 
 dev_dependencies:
   lints: ^6.0.0

@@ -1,7 +1,6 @@
 #!/usr/bin/env dart
 
 import 'dart:io';
-import 'package:args/args.dart';
 
 void main(List<String> args) async {
   if (args.isEmpty) {

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:rivet/rivet.dart';
 
 class RivetTestClient {
   final String baseUrl;

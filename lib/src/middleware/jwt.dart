@@ -1,8 +1,6 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 import '../http/request.dart';
-import '../http/response.dart';
 import '../utils/exception.dart';
 import 'middleware.dart';
 

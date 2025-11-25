@@ -2,17 +2,20 @@
 
 **The Ultimate Full-Stack Dart Framework**
 
-🚀 **3x Faster than Express** | 🔒 **Production-Ready** | 🎯 **Type-Safe** | ⚡ **Native Compilation**
+🚀 **1.8x Faster than Express** | 🔒 **Production-Ready** | 🎯 **Type-Safe** | ⚡ **Native Compilation**
+
+> **Note:** This is **Rivet for Dart**, a high-performance backend framework for Dart and Flutter.  
+> Not to be confused with [rivet.dev](https://rivet.dev), which is a TypeScript framework for stateful workloads.
 
 ---
 
 ## Why Rivet?
 
-Rivet is the **only framework** that gives you:
+Rivet is the **only Dart framework** that gives you:
 
 - ✅ **Single Language** - Dart everywhere (backend + Flutter frontend)
 - ✅ **Native Compilation** - Deploy a single executable (no runtime needed)
-- ✅ **Blazing Fast** - 26,347 req/sec on dynamic routes (3x faster than Express)
+- ✅ **Blazing Fast** - 24,277 req/sec on dynamic routes (1.8x faster than Express)
 - ✅ **Type-Safe** - End-to-end type safety
 - ✅ **Production-Ready** - Built-in auth, rate limiting, WebSockets, database support
 

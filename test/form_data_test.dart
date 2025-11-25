@@ -4,7 +4,6 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:test/test.dart';
 import 'package:rivet/src/http/request.dart';
-import 'package:rivet/src/http/file.dart';
 
 // Stub HttpHeaders
 class StubHttpHeaders implements HttpHeaders {

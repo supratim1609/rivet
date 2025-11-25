@@ -1,6 +1,5 @@
 import 'dart:async';
 import '../http/request.dart';
-import '../http/response.dart';
 import '../middleware/middleware.dart';
 
 // Plugin interface

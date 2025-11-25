@@ -1,4 +1,5 @@
 /// The central export for Rivet’s public API
+library;
 
 export 'http/server.dart';
 export 'http/request.dart';

@@ -1,6 +1,5 @@
 import 'dart:async';
 import '../http/request.dart';
-import '../http/response.dart';
 import '../utils/exception.dart';
 import 'middleware.dart';
 

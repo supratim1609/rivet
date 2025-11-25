@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import '../router/route.dart';
 import '../http/request.dart';
 import '../http/response.dart';
 

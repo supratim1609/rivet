@@ -48,8 +48,9 @@ MiddlewareHandler createStaticHandler(String rootPath) {
       // Fallback for common types if mime package fails
       if (mimeType == null) {
         final ext = p.extension(file.path).toLowerCase();
-        if (ext == '.css') mimeType = 'text/css';
-        else if (ext == '.html') mimeType = 'text/html';
+        if (ext == '.css') {
+          mimeType = 'text/css';
+        } else if (ext == '.html') mimeType = 'text/html';
         else if (ext == '.js') mimeType = 'application/javascript';
         else if (ext == '.json') mimeType = 'application/json';
         else mimeType = 'application/octet-stream';
@@ -58,7 +59,7 @@ MiddlewareHandler createStaticHandler(String rootPath) {
       return RivetResponse(
         file.openRead(),
         headers: {
-          HttpHeaders.contentTypeHeader: mimeType!,
+          HttpHeaders.contentTypeHeader: mimeType,
           HttpHeaders.contentLengthHeader: stat.size.toString(),
         },
       );
