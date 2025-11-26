@@ -5,6 +5,9 @@
 - **Development Branch Created**:
   - Starting v2.0 development
   - New features planned:
+    - **Shelf adapter** (ecosystem compatibility)
+    - **build_runner support** (standard Dart code gen)
+    - **Dart framework benchmarks** (vs Shelf, Dart Frog, Serverpod)
     - Compression middleware (gzip, brotli)
     - Security headers middleware
     - Body size limits
