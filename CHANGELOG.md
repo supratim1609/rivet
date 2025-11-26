@@ -1,5 +1,21 @@
 # Changelog
 
+## 2.0.0-dev.1
+
+- **Development Branch Created**:
+  - Starting v2.0 development
+  - New features planned:
+    - Compression middleware (gzip, brotli)
+    - Security headers middleware
+    - Body size limits
+    - Cookie parser
+    - Session management
+    - GraphQL support
+    - WebSocket rooms
+    - Server-sent events
+    - Advanced caching layer
+    - Metrics and monitoring
+
 ## 1.0.1
 
 - **Improvements**:
