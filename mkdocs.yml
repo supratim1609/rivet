@@ -1,0 +1,50 @@
+name: Rivet
+theme:
+  name: material
+  palette:
+    primary: blue
+    accent: cyan
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - toc.integrate
+    - search.suggest
+    - search.highlight
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Installation: installation.md
+    - Quick Start: quick-start.md
+    - First API: first-api.md
+  - Core Concepts:
+    - Routing: routing.md
+    - Middleware: middleware.md
+    - Request & Response: request-response.md
+  - Features:
+    - JWT Authentication: jwt.md
+    - WebSockets: websockets.md
+    - Database: database.md
+    - Rate Limiting: rate-limiting.md
+    - CORS: cors.md
+  - Advanced:
+    - Client Generation: client-generation.md
+    - Multi-core Clustering: clustering.md
+    - Hot Reload: hot-reload.md
+    - Performance Tuning: performance.md
+  - Deployment:
+    - Production: deployment.md
+    - Docker: docker.md
+    - Cloud Platforms: cloud.md
+  - Benchmarks:
+    - Performance: benchmarks.md
+    - Stress Tests: stress-tests.md
+  - API Reference: api-reference.md
+  - FAQ: faq.md
+
+markdown_extensions:
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.tabbed
+  - admonition
+  - codehilite
