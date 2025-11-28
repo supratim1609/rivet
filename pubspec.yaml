@@ -1,6 +1,6 @@
 name: rivet
-description: A high-performance, type-safe, full-stack web framework for Dart with built-in JWT, WebSockets, and Admin Panel.
-version: 2.0.0-dev.1
+description: A blazing-fast, type-safe backend framework for Dart with auto-generated Flutter clients
+version: 1.2.0
 homepage: https://github.com/supratim1609/rivet
 repository: https://github.com/supratim1609/rivet
 

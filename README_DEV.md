@@ -1,21 +1,20 @@
-# Rivet v2.0 Development
+# Rivet Development Branch
 
-Welcome to the v2.0 development branch!
+This is the `dev` branch for Rivet v1.2.0 development.
 
 ## 🚧 Status: Active Development
 
-This branch contains work-in-progress features for Rivet v2.0.
+This branch contains work-in-progress features for Rivet v1.2.0.
 
 **⚠️ Not for production use!**
 
-## 🎯 v2.0 Goals
+## 🎯 v1.2.0 Goals
 
-### Core Features
-- [ ] Compression middleware (gzip, brotli)
-- [ ] Security headers middleware
-- [ ] Body size limits
-- [ ] Cookie parser
-- [ ] Session management
+This release focuses on **ecosystem compatibility** and **standard tooling**:
+
+1. **Shelf Adapter** - Use Shelf middleware in Rivet
+2. **build_runner Support** - Standard Dart code generation
+3. **Dart Framework Benchmarks** - Performance validation
 
 ### Advanced Features
 - [ ] GraphQL support
