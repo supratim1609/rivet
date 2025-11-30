@@ -6,7 +6,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 /// Auto-generated API client for your Rivet backend
-/// 
+///
 /// Usage:
 /// ```dart
 /// final client = RivetClient('http://localhost:3000');
@@ -21,13 +21,16 @@ class RivetClient {
     this.baseUrl, {
     http.Client? client,
     Map<String, String>? defaultHeaders,
-  })  : _client = client ?? http.Client(),
-        _defaultHeaders = defaultHeaders ?? {};
+  }) : _client = client ?? http.Client(),
+       _defaultHeaders = defaultHeaders ?? {};
 
   /// Make a GET request
-  Future<Map<String, dynamic>> get(String path, {Map<String, String>? queryParams}) async {
+  Future<Map<String, dynamic>> get(
+    String path, {
+    Map<String, String>? queryParams,
+  }) async {
     var url = Uri.parse('\$baseUrl\$path');
-    
+
     if (queryParams != null && queryParams.isNotEmpty) {
       url = url.replace(queryParameters: queryParams);
     }
@@ -43,7 +46,10 @@ class RivetClient {
   }
 
   /// Make a POST request
-  Future<Map<String, dynamic>> post(String path, {Map<String, dynamic>? body}) async {
+  Future<Map<String, dynamic>> post(
+    String path, {
+    Map<String, dynamic>? body,
+  }) async {
     final url = Uri.parse('\$baseUrl\$path');
     final headers = {..._defaultHeaders, 'Content-Type': 'application/json'};
 
@@ -61,7 +67,10 @@ class RivetClient {
   }
 
   /// Make a PUT request
-  Future<Map<String, dynamic>> put(String path, {Map<String, dynamic>? body}) async {
+  Future<Map<String, dynamic>> put(
+    String path, {
+    Map<String, dynamic>? body,
+  }) async {
     final url = Uri.parse('\$baseUrl\$path');
     final headers = {..._defaultHeaders, 'Content-Type': 'application/json'};
 

@@ -28,31 +28,37 @@ class StubHttpHeaders implements HttpHeaders {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
-
-
 // Stub HttpRequest
 class StubHttpRequest extends Stream<Uint8List> implements HttpRequest {
   final Stream<Uint8List> _bodyStream;
-  
+
   @override
   final Uri uri;
-  
+
   @override
   final String method = 'POST';
-  
+
   @override
   final HttpHeaders headers = StubHttpHeaders();
 
-  StubHttpRequest(this.uri, List<int> bodyBytes) 
-      : _bodyStream = Stream.value(Uint8List.fromList(bodyBytes));
+  StubHttpRequest(this.uri, List<int> bodyBytes)
+    : _bodyStream = Stream.value(Uint8List.fromList(bodyBytes));
 
   @override
-  StreamSubscription<Uint8List> listen(void Function(Uint8List event)? onData,
-      {Function? onError, void Function()? onDone, bool? cancelOnError}) {
-    return _bodyStream.listen(onData,
-        onError: onError, onDone: onDone, cancelOnError: cancelOnError);
+  StreamSubscription<Uint8List> listen(
+    void Function(Uint8List event)? onData, {
+    Function? onError,
+    void Function()? onDone,
+    bool? cancelOnError,
+  }) {
+    return _bodyStream.listen(
+      onData,
+      onError: onError,
+      onDone: onDone,
+      cancelOnError: cancelOnError,
+    );
   }
-  
+
   // Cast is needed for transform
   @override
   Stream<S> cast<S>() => _bodyStream.cast<S>();
@@ -65,18 +71,27 @@ void main() {
   group('RivetRequest Form Data', () {
     test('parses simple form fields', () async {
       final boundary = 'boundary123';
-      final body = '--$boundary\r\n'
+      final body =
+          '--$boundary\r\n'
           'Content-Disposition: form-data; name="username"\r\n\r\n'
           'antigravity\r\n'
           '--$boundary--\r\n';
-      
-      final req = RivetRequest.from(StubHttpRequest(
-        Uri.parse('http://localhost/upload'),
-        utf8.encode(body),
-      ));
-      
-      req.headers.set(HttpHeaders.contentTypeHeader, 
-          ContentType('multipart', 'form-data', parameters: {'boundary': boundary}));
+
+      final req = RivetRequest.from(
+        StubHttpRequest(
+          Uri.parse('http://localhost/upload'),
+          utf8.encode(body),
+        ),
+      );
+
+      req.headers.set(
+        HttpHeaders.contentTypeHeader,
+        ContentType(
+          'multipart',
+          'form-data',
+          parameters: {'boundary': boundary},
+        ),
+      );
 
       await req.parseBody();
 
@@ -87,19 +102,28 @@ void main() {
     test('parses file upload', () async {
       final boundary = 'boundary123';
       final fileContent = 'Hello World';
-      final body = '--$boundary\r\n'
+      final body =
+          '--$boundary\r\n'
           'Content-Disposition: form-data; name="doc"; filename="test.txt"\r\n'
           'Content-Type: text/plain\r\n\r\n'
           '$fileContent\r\n'
           '--$boundary--\r\n';
 
-      final req = RivetRequest.from(StubHttpRequest(
-        Uri.parse('http://localhost/upload'),
-        utf8.encode(body),
-      ));
+      final req = RivetRequest.from(
+        StubHttpRequest(
+          Uri.parse('http://localhost/upload'),
+          utf8.encode(body),
+        ),
+      );
 
-      req.headers.set(HttpHeaders.contentTypeHeader, 
-          ContentType('multipart', 'form-data', parameters: {'boundary': boundary}));
+      req.headers.set(
+        HttpHeaders.contentTypeHeader,
+        ContentType(
+          'multipart',
+          'form-data',
+          parameters: {'boundary': boundary},
+        ),
+      );
 
       await req.parseBody();
 
@@ -113,7 +137,8 @@ void main() {
 
     test('parses mixed fields and files', () async {
       final boundary = 'boundary123';
-      final body = '--$boundary\r\n'
+      final body =
+          '--$boundary\r\n'
           'Content-Disposition: form-data; name="title"\r\n\r\n'
           'My Document\r\n'
           '--$boundary\r\n'
@@ -122,13 +147,21 @@ void main() {
           'Content\r\n'
           '--$boundary--\r\n';
 
-      final req = RivetRequest.from(StubHttpRequest(
-        Uri.parse('http://localhost/upload'),
-        utf8.encode(body),
-      ));
+      final req = RivetRequest.from(
+        StubHttpRequest(
+          Uri.parse('http://localhost/upload'),
+          utf8.encode(body),
+        ),
+      );
 
-      req.headers.set(HttpHeaders.contentTypeHeader, 
-          ContentType('multipart', 'form-data', parameters: {'boundary': boundary}));
+      req.headers.set(
+        HttpHeaders.contentTypeHeader,
+        ContentType(
+          'multipart',
+          'form-data',
+          parameters: {'boundary': boundary},
+        ),
+      );
 
       await req.parseBody();
 

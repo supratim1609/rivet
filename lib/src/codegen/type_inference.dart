@@ -8,10 +8,7 @@ class TypeInference {
   final Map<String, TypeDefinition> _knownTypes = {};
 
   /// Infer type from a Map (simulating JSON response)
-  TypeDefinition inferFromMap(
-    String typeName,
-    Map<String, dynamic> json,
-  ) {
+  TypeDefinition inferFromMap(String typeName, Map<String, dynamic> json) {
     final fields = <String, FieldDefinition>{};
 
     json.forEach((key, value) {
@@ -25,11 +22,7 @@ class TypeInference {
 
   FieldDefinition _inferField(String name, dynamic value) {
     if (value == null) {
-      return FieldDefinition(
-        name: name,
-        dartType: 'dynamic',
-        isNullable: true,
-      );
+      return FieldDefinition(name: name, dartType: 'dynamic', isNullable: true);
     }
 
     if (value is String) {
@@ -50,11 +43,7 @@ class TypeInference {
 
     if (value is List) {
       if (value.isEmpty) {
-        return FieldDefinition(
-          name: name,
-          dartType: 'dynamic',
-          isList: true,
-        );
+        return FieldDefinition(name: name, dartType: 'dynamic', isList: true);
       }
 
       final firstItem = value.first;
@@ -82,17 +71,11 @@ class TypeInference {
       // Nested object
       final nestedTypeName = _capitalize(name);
       final nestedType = inferFromMap(nestedTypeName, value);
-      return FieldDefinition(
-        name: name,
-        dartType: nestedType.name,
-      );
+      return FieldDefinition(name: name, dartType: nestedType.name);
     }
 
     // Fallback
-    return FieldDefinition(
-      name: name,
-      dartType: 'dynamic',
-    );
+    return FieldDefinition(name: name, dartType: 'dynamic');
   }
 
   String _capitalize(String s) {

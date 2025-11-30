@@ -43,10 +43,10 @@ MiddlewareHandler requestLogger({
 
   return (RivetRequest req, FutureOr<dynamic> Function() next) async {
     final startTime = DateTime.now();
-    
+
     // Log request
     log.info('→ ${req.method} ${req.path}');
-    
+
     if (level == LogLevel.debug) {
       log.debug('  Headers: ${req.headers.toString()}');
       log.debug('  Query: ${req.query}');
@@ -54,23 +54,31 @@ MiddlewareHandler requestLogger({
 
     try {
       final result = await next();
-      
+
       final duration = DateTime.now().difference(startTime);
       final statusCode = result is RivetResponse ? result.statusCode : 200;
-      
+
       // Determine log level based on status code
       if (statusCode >= 500) {
-        log.error('← ${req.method} ${req.path} $statusCode ${duration.inMilliseconds}ms');
+        log.error(
+          '← ${req.method} ${req.path} $statusCode ${duration.inMilliseconds}ms',
+        );
       } else if (statusCode >= 400) {
-        log.warn('← ${req.method} ${req.path} $statusCode ${duration.inMilliseconds}ms');
+        log.warn(
+          '← ${req.method} ${req.path} $statusCode ${duration.inMilliseconds}ms',
+        );
       } else {
-        log.info('← ${req.method} ${req.path} $statusCode ${duration.inMilliseconds}ms');
+        log.info(
+          '← ${req.method} ${req.path} $statusCode ${duration.inMilliseconds}ms',
+        );
       }
-      
+
       return result;
     } catch (e) {
       final duration = DateTime.now().difference(startTime);
-      log.error('← ${req.method} ${req.path} ERROR ${duration.inMilliseconds}ms: $e');
+      log.error(
+        '← ${req.method} ${req.path} ERROR ${duration.inMilliseconds}ms: $e',
+      );
       rethrow;
     }
   };
@@ -80,12 +88,12 @@ MiddlewareHandler requestLogger({
 MiddlewareHandler jsonLogger() {
   return (RivetRequest req, FutureOr<dynamic> Function() next) async {
     final startTime = DateTime.now();
-    
+
     try {
       final result = await next();
       final duration = DateTime.now().difference(startTime);
       final statusCode = result is RivetResponse ? result.statusCode : 200;
-      
+
       final logEntry = {
         'timestamp': DateTime.now().toIso8601String(),
         'method': req.method,
@@ -94,12 +102,12 @@ MiddlewareHandler jsonLogger() {
         'duration': duration.inMilliseconds,
         'ip': req.raw.connectionInfo?.remoteAddress.address,
       };
-      
+
       print(logEntry);
       return result;
     } catch (e) {
       final duration = DateTime.now().difference(startTime);
-      
+
       final logEntry = {
         'timestamp': DateTime.now().toIso8601String(),
         'method': req.method,
@@ -109,7 +117,7 @@ MiddlewareHandler jsonLogger() {
         'error': e.toString(),
         'ip': req.raw.connectionInfo?.remoteAddress.address,
       };
-      
+
       print(logEntry);
       rethrow;
     }

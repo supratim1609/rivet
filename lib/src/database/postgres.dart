@@ -24,7 +24,7 @@ class PostgresAdapter {
       ),
       settings: ConnectionSettings(sslMode: SslMode.disable),
     );
-    
+
     final adapter = PostgresAdapter._internal(connection);
     adapter._isConnected = true;
     return adapter;
@@ -38,7 +38,7 @@ class PostgresAdapter {
       Sql.named(sql),
       parameters: substitutionValues,
     );
-    
+
     return result.map((row) {
       final Map<String, dynamic> rowData = {};
       for (var i = 0; i < row.length; i++) {

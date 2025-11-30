@@ -1,0 +1,17 @@
+targets:
+  $default:
+    builders:
+      rivet|client_builder:
+        enabled: true
+        generate_for:
+          - lib/client.dart
+          - example/*.dart
+
+builders:
+  client_builder:
+    import: "package:rivet/src/builder/client_builder.dart"
+    builder_factories: ["clientBuilder"]
+    build_extensions: {".dart": [".rivet_client.g.part"]}
+    auto_apply: dependents
+    build_to: cache
+    applies_builders: ["source_gen:combining_builder"]

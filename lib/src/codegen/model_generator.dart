@@ -39,7 +39,8 @@ class ModelGenerator {
 
     // fromJson factory
     buffer.writeln(
-        '  factory ${type.name}.fromJson(Map<String, dynamic> json) {');
+      '  factory ${type.name}.fromJson(Map<String, dynamic> json) {',
+    );
     buffer.writeln('    return ${type.name}(');
 
     type.fields.forEach((name, field) {
@@ -48,15 +49,16 @@ class ModelGenerator {
           buffer.writeln('      $name: json[\'$name\'] as List<dynamic>,');
         } else if (_isPrimitive(field.dartType)) {
           buffer.writeln(
-              '      $name: (json[\'$name\'] as List<dynamic>).cast<${field.dartType}>(),');
+            '      $name: (json[\'$name\'] as List<dynamic>).cast<${field.dartType}>(),',
+          );
         } else {
           buffer.writeln(
-              '      $name: (json[\'$name\'] as List<dynamic>).map((e) => ${field.dartType}.fromJson(e as Map<String, dynamic>)).toList(),');
+            '      $name: (json[\'$name\'] as List<dynamic>).map((e) => ${field.dartType}.fromJson(e as Map<String, dynamic>)).toList(),',
+          );
         }
       } else if (_isPrimitive(field.dartType)) {
         if (field.isNullable) {
-          buffer.writeln(
-              '      $name: json[\'$name\'] as ${field.dartType}?,');
+          buffer.writeln('      $name: json[\'$name\'] as ${field.dartType}?,');
         } else {
           buffer.writeln('      $name: json[\'$name\'] as ${field.dartType},');
         }
@@ -64,10 +66,12 @@ class ModelGenerator {
         // Custom type
         if (field.isNullable) {
           buffer.writeln(
-              '      $name: json[\'$name\'] != null ? ${field.dartType}.fromJson(json[\'$name\'] as Map<String, dynamic>) : null,');
+            '      $name: json[\'$name\'] != null ? ${field.dartType}.fromJson(json[\'$name\'] as Map<String, dynamic>) : null,',
+          );
         } else {
           buffer.writeln(
-              '      $name: ${field.dartType}.fromJson(json[\'$name\'] as Map<String, dynamic>),');
+            '      $name: ${field.dartType}.fromJson(json[\'$name\'] as Map<String, dynamic>),',
+          );
         }
       }
     });
@@ -83,7 +87,9 @@ class ModelGenerator {
 
     type.fields.forEach((name, field) {
       if (field.isList && !_isPrimitive(field.dartType)) {
-        buffer.writeln('      \'$name\': $name.map((e) => e.toJson()).toList(),');
+        buffer.writeln(
+          '      \'$name\': $name.map((e) => e.toJson()).toList(),',
+        );
       } else if (!_isPrimitive(field.dartType) && !field.isNullable) {
         buffer.writeln('      \'$name\': $name.toJson(),');
       } else if (!_isPrimitive(field.dartType) && field.isNullable) {

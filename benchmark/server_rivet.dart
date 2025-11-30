@@ -7,7 +7,10 @@ void main() async {
     return RivetResponse.text('Hello World');
   });
 
-  await app.listen(port: 3000, onStarted: () {
-    print('Rivet Benchmark Server running on port 3000');
-  });
+  await app.listen(
+    port: 3000,
+    onStarted: () {
+      print('Rivet Benchmark Server running on port 3000');
+    },
+  );
 }

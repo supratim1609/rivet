@@ -28,7 +28,10 @@ class MySQLAdapter {
     return adapter;
   }
 
-  Future<List<Map<String, dynamic>>> query(String sql, [List<dynamic>? params]) async {
+  Future<List<Map<String, dynamic>>> query(
+    String sql, [
+    List<dynamic>? params,
+  ]) async {
     final results = await _connection.query(sql, params);
     return results.map((row) => row.fields).toList();
   }

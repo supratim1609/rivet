@@ -11,15 +11,15 @@ class StubHttpHeaders implements HttpHeaders {
 class StubHttpRequest implements HttpRequest {
   @override
   final Uri uri;
-  
+
   @override
   final String method;
-  
+
   @override
   final HttpHeaders headers;
 
-  StubHttpRequest(this.uri, {this.method = 'GET'}) 
-      : headers = StubHttpHeaders();
+  StubHttpRequest(this.uri, {this.method = 'GET'})
+    : headers = StubHttpHeaders();
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
@@ -42,7 +42,7 @@ void main() {
       final req = createRequest('http://localhost/filter?ids=1&ids=2');
       expect(req.queryAll['ids'], equals(['1', '2']));
       // Uri.queryParameters uses the last value for duplicates
-      expect(req.query['ids'], equals('2')); 
+      expect(req.query['ids'], equals('2'));
     });
 
     test('getInt returns integer or null', () {
@@ -59,7 +59,9 @@ void main() {
     });
 
     test('getBool returns boolean', () {
-      final req = createRequest('http://localhost/?active=true&flag=1&off=false');
+      final req = createRequest(
+        'http://localhost/?active=true&flag=1&off=false',
+      );
       expect(req.getBool('active'), isTrue);
       expect(req.getBool('flag'), isTrue);
       expect(req.getBool('off'), isFalse);

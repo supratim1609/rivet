@@ -15,16 +15,20 @@ class Cache {
   T? get<T>(String key) {
     final entry = _cache[key];
     if (entry == null) return null;
-    
+
     if (entry.isExpired) {
       _cache.remove(key);
       return null;
     }
-    
+
     return entry.value as T?;
   }
 
-  void set<T>(String key, T value, {Duration ttl = const Duration(minutes: 5)}) {
+  void set<T>(
+    String key,
+    T value, {
+    Duration ttl = const Duration(minutes: 5),
+  }) {
     final expiry = DateTime.now().add(ttl);
     _cache[key] = CacheEntry(value, expiry);
   }
@@ -48,7 +52,8 @@ class Cache {
 final cache = Cache();
 
 // Cache middleware
-typedef CacheKeyGenerator = String Function(String method, String path, Map<String, String> query);
+typedef CacheKeyGenerator =
+    String Function(String method, String path, Map<String, String> query);
 
 String defaultCacheKey(String method, String path, Map<String, String> query) {
   if (query.isEmpty) return '$method:$path';
@@ -60,15 +65,20 @@ String defaultCacheKey(String method, String path, Map<String, String> query) {
 // For production, you'd want Redis or similar
 class CacheManager {
   static final Cache _instance = Cache();
-  
+
   static void startCleanup() {
     Timer.periodic(Duration(minutes: 1), (_) => _instance.cleanup());
   }
-  
+
   static T? get<T>(String key) => _instance.get<T>(key);
-  static void set<T>(String key, T value, {Duration ttl = const Duration(minutes: 5)}) {
+  static void set<T>(
+    String key,
+    T value, {
+    Duration ttl = const Duration(minutes: 5),
+  }) {
     _instance.set(key, value, ttl: ttl);
   }
+
   static void delete(String key) => _instance.delete(key);
   static void clear() => _instance.clear();
 }

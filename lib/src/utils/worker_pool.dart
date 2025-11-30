@@ -6,30 +6,31 @@ class WorkerPool {
   final List<HttpServer> _servers = [];
   final int _currentWorker = 0;
 
-  WorkerPool({int? workerCount}) : workerCount = workerCount ?? Platform.numberOfProcessors;
+  WorkerPool({int? workerCount})
+    : workerCount = workerCount ?? Platform.numberOfProcessors;
 
   Future<void> start(
     int port,
     Future<void> Function(HttpRequest) handler,
   ) async {
     print('[WORKER POOL] Starting $workerCount workers...');
-    
+
     for (var i = 0; i < workerCount; i++) {
       final server = await HttpServer.bind(
         InternetAddress.anyIPv4,
         port,
         shared: true,
       );
-      
+
       _servers.add(server);
-      
+
       server.listen((request) async {
         await handler(request);
       });
-      
+
       print('[WORKER POOL] Worker $i listening on port $port');
     }
-    
+
     print('[WORKER POOL] All workers started ✅');
   }
 

@@ -27,7 +27,10 @@ class RivetTestClient {
     return _request('PUT', path, headers: headers, body: body);
   }
 
-  Future<TestResponse> delete(String path, {Map<String, String>? headers}) async {
+  Future<TestResponse> delete(
+    String path, {
+    Map<String, String>? headers,
+  }) async {
     return _request('DELETE', path, headers: headers);
   }
 
@@ -56,7 +59,9 @@ class RivetTestClient {
     }
 
     final response = await request.close();
-    final responseBody = await response.transform(SystemEncoding().decoder).join();
+    final responseBody = await response
+        .transform(SystemEncoding().decoder)
+        .join();
 
     return TestResponse(
       statusCode: response.statusCode,
@@ -105,7 +110,9 @@ class TestResponse {
   TestResponse expectHeader(String key, String value) {
     final headerValue = headers.value(key);
     if (headerValue != value) {
-      throw Exception('Expected header $key to be "$value" but got "$headerValue"');
+      throw Exception(
+        'Expected header $key to be "$value" but got "$headerValue"',
+      );
     }
     return this;
   }

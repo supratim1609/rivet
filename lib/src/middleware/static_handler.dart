@@ -25,8 +25,10 @@ MiddlewareHandler createStaticHandler(String rootPath) {
     // Security check: Ensure path is within root
     // We use p.normalize to resolve .. segments before checking
     // requestPath usually starts with /, so substring(1) is correct, but let's be safer
-    final relativePath = requestPath.startsWith('/') ? requestPath.substring(1) : requestPath;
-    final file = File(p.join(root, relativePath)); 
+    final relativePath = requestPath.startsWith('/')
+        ? requestPath.substring(1)
+        : requestPath;
+    final file = File(p.join(root, relativePath));
     // Resolve symlinks for the target file too
     String resolvedPath;
     try {
@@ -44,18 +46,22 @@ MiddlewareHandler createStaticHandler(String rootPath) {
     if (await file.exists()) {
       final stat = await file.stat();
       var mimeType = lookupMimeType(file.path);
-      
+
       // Fallback for common types if mime package fails
       if (mimeType == null) {
         final ext = p.extension(file.path).toLowerCase();
         if (ext == '.css') {
           mimeType = 'text/css';
-        } else if (ext == '.html') mimeType = 'text/html';
-        else if (ext == '.js') mimeType = 'application/javascript';
-        else if (ext == '.json') mimeType = 'application/json';
-        else mimeType = 'application/octet-stream';
+        } else if (ext == '.html')
+          mimeType = 'text/html';
+        else if (ext == '.js')
+          mimeType = 'application/javascript';
+        else if (ext == '.json')
+          mimeType = 'application/json';
+        else
+          mimeType = 'application/octet-stream';
       }
-      
+
       return RivetResponse(
         file.openRead(),
         headers: {

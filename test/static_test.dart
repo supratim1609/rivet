@@ -13,17 +13,21 @@ void main() {
       tempDir = await Directory.systemTemp.createTemp('rivet_static_test');
       app = RivetServer();
       app.use(createStaticHandler(tempDir.path));
-      
+
       // Setup test files
       await File(p.join(tempDir.path, 'test.txt')).writeAsString('Hello World');
-      await File(p.join(tempDir.path, 'style.css')).writeAsString('body { color: red; }');
-      await File(p.join(tempDir.path, 'index.html')).writeAsString('<h1>Index</h1>');
-      
+      await File(
+        p.join(tempDir.path, 'style.css'),
+      ).writeAsString('body { color: red; }');
+      await File(
+        p.join(tempDir.path, 'index.html'),
+      ).writeAsString('<h1>Index</h1>');
+
       // Start server on random port
       final server = await HttpServer.bind('localhost', 0);
       port = server.port;
       await server.close();
-      
+
       // Run listen unawaited so it doesn't block
       app.listen(port: port);
       // Give it a moment to start
@@ -41,7 +45,7 @@ void main() {
       final client = HttpClient();
       final req = await client.get('localhost', port, '/test.txt');
       final res = await req.close();
-      
+
       expect(res.statusCode, equals(200));
       final body = await res.transform(SystemEncoding().decoder).join();
       expect(body, equals('Hello World'));
@@ -51,7 +55,7 @@ void main() {
       final client = HttpClient();
       final req = await client.get('localhost', port, '/style.css');
       final res = await req.close();
-      
+
       expect(res.headers.contentType?.mimeType, equals('text/css'));
     });
 
@@ -59,7 +63,7 @@ void main() {
       final client = HttpClient();
       final req = await client.get('localhost', port, '/');
       final res = await req.close();
-      
+
       expect(res.statusCode, equals(200));
       final body = await res.transform(SystemEncoding().decoder).join();
       expect(body, equals('<h1>Index</h1>'));
@@ -72,7 +76,7 @@ void main() {
       // A better test is to try to go up from tempDir.
       final req = await client.get('localhost', port, '/../secret.txt');
       final res = await req.close();
-      
+
       // Should be 404 because static handler calls next(), and no other route matches
       expect(res.statusCode, equals(404));
     });

@@ -8,25 +8,20 @@ class ServerSentEvent {
   final String? id;
   final int? retry;
 
-  ServerSentEvent({
-    this.event,
-    required this.data,
-    this.id,
-    this.retry,
-  });
+  ServerSentEvent({this.event, required this.data, this.id, this.retry});
 
   String format() {
     final buffer = StringBuffer();
     if (id != null) buffer.writeln('id: $id');
     if (event != null) buffer.writeln('event: $event');
     if (retry != null) buffer.writeln('retry: $retry');
-    
+
     // Handle multi-line data
     for (final line in data.split('\n')) {
       buffer.writeln('data: $line');
     }
     buffer.writeln();
-    
+
     return buffer.toString();
   }
 }
@@ -39,7 +34,11 @@ class SSEStream {
   SSEStream._(this._controller, this._response);
 
   static SSEStream create(HttpResponse response) {
-    response.headers.contentType = ContentType('text', 'event-stream', charset: 'utf-8');
+    response.headers.contentType = ContentType(
+      'text',
+      'event-stream',
+      charset: 'utf-8',
+    );
     response.headers.set('Cache-Control', 'no-cache');
     response.headers.set('Connection', 'keep-alive');
 
@@ -61,11 +60,7 @@ class SSEStream {
 
   void send(String data, {String? event, String? id}) {
     if (_closed) return;
-    _controller.add(ServerSentEvent(
-      data: data,
-      event: event,
-      id: id,
-    ));
+    _controller.add(ServerSentEvent(data: data, event: event, id: id));
   }
 
   void sendJson(Map<String, dynamic> data, {String? event, String? id}) {

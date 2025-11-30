@@ -9,12 +9,12 @@ void main() {
 
     setUp(() async {
       app = RivetServer();
-      
+
       // Start server on random port
       final server = await HttpServer.bind('localhost', 0);
       port = server.port;
       await server.close();
-      
+
       // Run listen unawaited
       app.listen(port: port);
       await Future.delayed(Duration(milliseconds: 100));
@@ -28,7 +28,7 @@ void main() {
       final client = HttpClient();
       final req = await client.get('localhost', port, '/controlled');
       final res = await req.close();
-      
+
       expect(res.statusCode, equals(403));
       final body = await res.transform(SystemEncoding().decoder).join();
       expect(body, equals('Not Allowed'));
@@ -42,7 +42,7 @@ void main() {
       final client = HttpClient();
       final req = await client.get('localhost', port, '/crash');
       final res = await req.close();
-      
+
       expect(res.statusCode, equals(500));
       final body = await res.transform(SystemEncoding().decoder).join();
       expect(body, equals('Internal Server Error'));
@@ -50,19 +50,23 @@ void main() {
 
     test('returns JSON when requested', () async {
       app.get('/json-error', (req) {
-        throw RivetException('Bad Input', statusCode: 400, details: {'field': 'email'});
+        throw RivetException(
+          'Bad Input',
+          statusCode: 400,
+          details: {'field': 'email'},
+        );
       });
 
       final client = HttpClient();
       final req = await client.get('localhost', port, '/json-error');
       req.headers.set(HttpHeaders.acceptHeader, 'application/json');
       final res = await req.close();
-      
+
       expect(res.statusCode, equals(400));
       expect(res.headers.contentType?.mimeType, equals('application/json'));
-      
+
       final body = await res.transform(SystemEncoding().decoder).join();
-      
+
       expect(body, contains('"error":"Bad Input"'));
       expect(body, contains('"details":{"field":"email"}'));
     });

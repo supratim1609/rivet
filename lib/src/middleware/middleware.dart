@@ -3,8 +3,11 @@ import 'dart:async';
 import '../http/request.dart';
 import '../http/response.dart';
 
-typedef MiddlewareHandler = FutureOr<dynamic> Function(
-    RivetRequest req, FutureOr<dynamic> Function() next);
+typedef MiddlewareHandler =
+    FutureOr<dynamic> Function(
+      RivetRequest req,
+      FutureOr<dynamic> Function() next,
+    );
 
 class Middleware {
   final List<MiddlewareHandler> _handlers = [];
@@ -17,7 +20,9 @@ class Middleware {
 
   /// Run middleware chain + final route handler
   Future<RivetResponse> run(
-      RivetRequest req, FutureOr<dynamic> Function() finalHandler) async {
+    RivetRequest req,
+    FutureOr<dynamic> Function() finalHandler,
+  ) async {
     int index = -1;
 
     // Recursive runner

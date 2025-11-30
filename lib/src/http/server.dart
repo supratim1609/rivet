@@ -63,8 +63,11 @@ class RivetServer {
     String address = '0.0.0.0',
     void Function()? onStarted,
   }) async {
-    _server =
-        await HttpServer.bind(InternetAddress(address), port, shared: true);
+    _server = await HttpServer.bind(
+      InternetAddress(address),
+      port,
+      shared: true,
+    );
     onStarted?.call();
     print('RIVET 🚀 running on http://$address:$port');
 
@@ -82,13 +85,13 @@ class RivetServer {
   }) async {
     print('RIVET 🚀 Starting in CLUSTER mode with $workers workers...');
     final manager = IsolateManager();
-    
+
     await manager.spawn(
       _clusterWorker,
       count: workers,
       args: [builder, address, port],
     );
-    
+
     print('RIVET 🚀 Master process running. Workers spawned.');
     await ProcessSignal.sigint.watch().first;
     manager.killAll();
@@ -105,11 +108,15 @@ class RivetServer {
 
     final app = RivetServer();
     builder(app); // Configure app
-    
+
     // Start listening (shared: true is default in listen)
-    app.listen(port: port, address: address, onStarted: () {
-      sendPort.send('Worker $id ready');
-    });
+    app.listen(
+      port: port,
+      address: address,
+      onStarted: () {
+        sendPort.send('Worker $id ready');
+      },
+    );
   }
 
   // Graceful shutdown
@@ -140,7 +147,7 @@ class RivetServer {
         return RivetResponse.text('Not Found', statusCode: 404);
       }
     });
-    
+
     // Send the response
     await _sendResponse(raw.response, response);
   }
@@ -148,7 +155,7 @@ class RivetServer {
   // Send RivetResponse
   Future<void> _sendResponse(HttpResponse raw, RivetResponse res) async {
     raw.statusCode = res.statusCode;
-    
+
     // Set all headers from response
     res.headers.forEach((key, value) {
       raw.headers.set(key, value);

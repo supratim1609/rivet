@@ -6,10 +6,10 @@ import '../middleware/middleware.dart';
 abstract class RivetPlugin {
   String get name;
   String get version;
-  
+
   Future<void> onInit();
   Future<void> onShutdown();
-  
+
   List<MiddlewareHandler> get middleware => [];
   Map<String, dynamic> get config => {};
 }
@@ -28,12 +28,12 @@ class PluginManager {
 
   Future<void> initialize() async {
     if (_initialized) return;
-    
+
     for (final plugin in _plugins) {
       await plugin.onInit();
       print('[PLUGIN] Loaded: ${plugin.name} v${plugin.version}');
     }
-    
+
     _initialized = true;
   }
 
@@ -81,6 +81,6 @@ class LoggerPlugin extends RivetPlugin {
     (RivetRequest req, FutureOr<dynamic> Function() next) async {
       print('[${DateTime.now()}] ${req.method} ${req.path}');
       return next();
-    }
+    },
   ];
 }
