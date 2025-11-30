@@ -66,7 +66,7 @@ MiddlewareHandler session({
   bool secure = false,
 }) {
   final store = SessionStore(maxAge: maxAge);
-  
+
   // Cleanup old sessions periodically
   Timer.periodic(Duration(minutes: 15), (_) => store.cleanup());
 
@@ -74,7 +74,7 @@ MiddlewareHandler session({
     // Get session ID from cookie
     final cookies = req.headers.value(HttpHeaders.cookieHeader);
     String? sessionId;
-    
+
     if (cookies != null) {
       final cookieList = cookies.split(';');
       for (final cookie in cookieList) {
@@ -103,7 +103,8 @@ MiddlewareHandler session({
 
     // Set cookie in response
     if (result is RivetResponse) {
-      final cookieValue = '$cookieName=$sessionId; Max-Age=${maxAge.inSeconds}; Path=/'
+      final cookieValue =
+          '$cookieName=$sessionId; Max-Age=${maxAge.inSeconds}; Path=/'
           '${httpOnly ? '; HttpOnly' : ''}'
           '${secure ? '; Secure' : ''}';
       result.headers['Set-Cookie'] = cookieValue;

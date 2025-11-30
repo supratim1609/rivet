@@ -44,3 +44,16 @@ package-lock.json
 
 # Gemini artifacts (don't publish these)
 .gemini/
+
+# Generated files (optional, but good for library dev)
+# *.g.dart
+
+# Documentation
+doc/api/
+
+# Benchmarks
+dart_benchmark_results_*.md
+
+# Temporary test files
+test_relic_import.dart
+server_relic.dart

@@ -26,14 +26,16 @@ void main() async {
     final q = req.query['q'] ?? '';
     final page = req.getInt('page') ?? 1;
     final active = req.getBool('active') ?? false;
-    return RivetResponse.text('Searching for "$q" on page $page (active: $active)');
+    return RivetResponse.text(
+      'Searching for "$q" on page $page (active: $active)',
+    );
   });
 
   app.post('/upload', (req) async {
     await req.parseBody();
     final field = req.formFields['field'] ?? 'none';
     final file = req.files.isNotEmpty ? req.files.first : null;
-    
+
     return RivetResponse.text(
       'Field: $field\n'
       'File: ${file?.filename} (${file?.data.length} bytes)',
@@ -41,8 +43,9 @@ void main() async {
   });
 
   await app.listen(
-      port: 3000,
-      onStarted: () {
-        print('Example server running at http://localhost:3000');
-      });
+    port: 3000,
+    onStarted: () {
+      print('Example server running at http://localhost:3000');
+    },
+  );
 }

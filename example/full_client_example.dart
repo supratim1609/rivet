@@ -1,5 +1,5 @@
 /// Complete example showing the auto-generated Flutter client in action
-/// 
+///
 /// This demonstrates:
 /// 1. Backend server with routes
 /// 2. Auto-generated client
@@ -29,11 +29,7 @@ void startServer() async {
     final body = await req.json();
     return RivetResponse.json({
       'token': 'jwt-token-here',
-      'user': {
-        'id': '123',
-        'name': body['email'],
-        'email': body['email'],
-      },
+      'user': {'id': '123', 'name': body['email'], 'email': body['email']},
     });
   });
 
@@ -41,25 +37,19 @@ void startServer() async {
   app.get('/posts', (req) {
     final page = req.query['page'] ?? '1';
     final limit = req.query['limit'] ?? '10';
-    
+
     return RivetResponse.json([
       {
         'id': '1',
         'title': 'Hello World',
         'content': 'This is a post',
-        'author': {
-          'id': '123',
-          'name': 'John Doe',
-        },
+        'author': {'id': '123', 'name': 'John Doe'},
       },
       {
         'id': '2',
         'title': 'Another Post',
         'content': 'More content here',
-        'author': {
-          'id': '456',
-          'name': 'Jane Smith',
-        },
+        'author': {'id': '456', 'name': 'Jane Smith'},
       },
     ]);
   });

@@ -41,15 +41,15 @@ void main() {
       final result = router.match('POST', '/hello');
       expect(result, isNull);
     });
-    
+
     test('prioritizes exact match over parameter', () {
       router.get('/users/new', (_) {});
       router.get('/users/:id', (_) {});
-      
+
       final resultNew = router.match('GET', '/users/new');
       expect(resultNew, isNotNull);
       expect(resultNew!.params, isEmpty); // Should match /users/new
-      
+
       final resultId = router.match('GET', '/users/123');
       expect(resultId, isNotNull);
       expect(resultId!.params, equals({'id': '123'}));

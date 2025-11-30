@@ -1,4 +1,3 @@
-
 class QueryBuilder {
   String? _table;
   final List<String> _selects = [];
@@ -60,7 +59,7 @@ class QueryBuilder {
     if (_table == null) throw Exception('Table not specified');
 
     final buffer = StringBuffer();
-    
+
     // SELECT
     if (_selects.isEmpty) {
       buffer.write('SELECT * ');
@@ -109,7 +108,11 @@ class QueryBuilder {
   }
 
   // UPDATE builder
-  static String update(String table, Map<String, dynamic> data, String whereClause) {
+  static String update(
+    String table,
+    Map<String, dynamic> data,
+    String whereClause,
+  ) {
     final sets = data.keys.map((k) => '$k = @$k').join(', ');
     return 'UPDATE $table SET $sets WHERE $whereClause RETURNING *';
   }

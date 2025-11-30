@@ -8,10 +8,7 @@ class RateLimiter {
   final Duration window;
   final Map<String, _TokenBucket> _buckets = {};
 
-  RateLimiter({
-    required this.maxRequests,
-    required this.window,
-  });
+  RateLimiter({required this.maxRequests, required this.window});
 
   bool _allowRequest(String key) {
     final bucket = _buckets.putIfAbsent(
@@ -36,8 +33,8 @@ class _TokenBucket {
   DateTime _lastRefill;
 
   _TokenBucket(this.capacity, this.refillDuration)
-      : _tokens = capacity,
-        _lastRefill = DateTime.now();
+    : _tokens = capacity,
+      _lastRefill = DateTime.now();
 
   bool consume() {
     _refill();
@@ -51,7 +48,7 @@ class _TokenBucket {
   void _refill() {
     final now = DateTime.now();
     final elapsed = now.difference(_lastRefill);
-    
+
     if (elapsed >= refillDuration) {
       _tokens = capacity;
       _lastRefill = now;
@@ -65,20 +62,20 @@ MiddlewareHandler rateLimit({
   String Function(RivetRequest)? keyGenerator,
 }) {
   final limiter = RateLimiter(maxRequests: maxRequests, window: window);
-  
+
   // Cleanup old buckets periodically
   Timer.periodic(window, (_) => limiter._cleanup());
 
   return (RivetRequest req, FutureOr<dynamic> Function() next) async {
-    final key = keyGenerator?.call(req) ?? 
-                req.raw.connectionInfo?.remoteAddress.address ?? 
-                'unknown';
+    final key =
+        keyGenerator?.call(req) ??
+        req.raw.connectionInfo?.remoteAddress.address ??
+        'unknown';
 
     if (!limiter._allowRequest(key)) {
-      return RivetResponse.json(
-        {'error': 'Too many requests. Please try again later.'},
-        statusCode: 429,
-      );
+      return RivetResponse.json({
+        'error': 'Too many requests. Please try again later.',
+      }, statusCode: 429);
     }
 
     return next();

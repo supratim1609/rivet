@@ -9,7 +9,7 @@ void main() {
 
     setUp(() async {
       app = RivetServer();
-      
+
       // Get random available port
       final server = await HttpServer.bind('localhost', 0);
       port = server.port;
@@ -27,28 +27,34 @@ void main() {
       final req = await client.get('localhost', port, '/');
       req.headers.set('Origin', 'http://example.com');
       final res = await req.close();
-      
+
       expect(res.headers.value('Access-Control-Allow-Origin'), equals('*'));
-      
+
       await app.close();
     });
 
     test('handles preflight OPTIONS request', () async {
       app.use(cors());
-      
+
       app.listen(port: port);
       await Future.delayed(Duration(milliseconds: 200));
-      
+
       final client = HttpClient();
       final req = await client.open('OPTIONS', 'localhost', port, '/');
       req.headers.set('Origin', 'http://example.com');
       req.headers.set('Access-Control-Request-Method', 'POST');
       final res = await req.close();
-      
+
       expect(res.statusCode, equals(204));
-      expect(res.headers.value('Access-Control-Allow-Methods'), contains('POST'));
-      expect(res.headers.value('Access-Control-Allow-Headers'), contains('Content-Type'));
-      
+      expect(
+        res.headers.value('Access-Control-Allow-Methods'),
+        contains('POST'),
+      );
+      expect(
+        res.headers.value('Access-Control-Allow-Headers'),
+        contains('Content-Type'),
+      );
+
       await app.close();
     });
 
@@ -63,9 +69,12 @@ void main() {
       final req = await client.get('localhost', port, '/');
       req.headers.set('Origin', 'http://trusted.com');
       final res = await req.close();
-      
-      expect(res.headers.value('Access-Control-Allow-Origin'), equals('http://trusted.com'));
-      
+
+      expect(
+        res.headers.value('Access-Control-Allow-Origin'),
+        equals('http://trusted.com'),
+      );
+
       await app.close();
     });
 
@@ -80,10 +89,10 @@ void main() {
       final req = await client.get('localhost', port, '/');
       req.headers.set('Origin', 'http://evil.com');
       final res = await req.close();
-      
+
       // Should NOT have the header
       expect(res.headers.value('Access-Control-Allow-Origin'), isNull);
-      
+
       await app.close();
     });
 
@@ -97,9 +106,12 @@ void main() {
       final client = HttpClient();
       final req = await client.get('localhost', port, '/');
       final res = await req.close();
-      
-      expect(res.headers.value('Access-Control-Allow-Credentials'), equals('true'));
-      
+
+      expect(
+        res.headers.value('Access-Control-Allow-Credentials'),
+        equals('true'),
+      );
+
       await app.close();
     });
   });

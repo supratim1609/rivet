@@ -10,7 +10,7 @@ class MongoAdapter {
   static Future<MongoAdapter> connect(String connectionString) async {
     final db = await Db.create(connectionString);
     await db.open();
-    
+
     final adapter = MongoAdapter._internal(db);
     adapter._isConnected = true;
     return adapter;

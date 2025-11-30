@@ -14,9 +14,10 @@ class RivetRequest {
   // Middleware / router can populate these
   Map<String, String> params = {}; // dynamic route params e.g., /user/:id
   Map<String, String> query = {}; // query params e.g., ?q=search
-  Map<String, List<String>> queryAll = {}; // all query params e.g., ?ids=1&ids=2
+  Map<String, List<String>> queryAll =
+      {}; // all query params e.g., ?ids=1&ids=2
   Map<String, dynamic>? jsonBody; // parsed JSON from middleware
-  
+
   // Form data
   Map<String, String> formFields = {};
   List<UploadedFile> files = [];
@@ -27,13 +28,7 @@ class RivetRequest {
   }
 
   static RivetRequest from(HttpRequest raw) {
-    return RivetRequest._(
-      raw.method,
-      raw.uri.path,
-      raw.uri,
-      raw.headers,
-      raw,
-    );
+    return RivetRequest._(raw.method, raw.uri.path, raw.uri, raw.headers, raw);
   }
 
   /// Parse body based on Content-Type
@@ -51,7 +46,7 @@ class RivetRequest {
       await for (final part in parts) {
         final contentDisposition = part.headers['content-disposition'];
         if (contentDisposition == null) continue;
-        
+
         final header = HeaderValue.parse(contentDisposition);
         final name = header.parameters['name'] ?? '';
         final filename = header.parameters['filename'];
@@ -59,12 +54,16 @@ class RivetRequest {
         if (filename != null) {
           // It's a file
           final data = await part.fold<List<int>>([], (p, e) => p..addAll(e));
-          files.add(UploadedFile(
-            name: name,
-            filename: filename,
-            contentType: ContentType.parse(part.headers['content-type'] ?? 'application/octet-stream'),
-            data: data,
-          ));
+          files.add(
+            UploadedFile(
+              name: name,
+              filename: filename,
+              contentType: ContentType.parse(
+                part.headers['content-type'] ?? 'application/octet-stream',
+              ),
+              data: data,
+            ),
+          );
         } else {
           // It's a field
           final value = await utf8.decodeStream(part);
@@ -72,8 +71,8 @@ class RivetRequest {
         }
       }
     } else if (contentType.mimeType == 'application/x-www-form-urlencoded') {
-       final body = await text();
-       formFields.addAll(Uri.splitQueryString(body));
+      final body = await text();
+      formFields.addAll(Uri.splitQueryString(body));
     }
   }
 

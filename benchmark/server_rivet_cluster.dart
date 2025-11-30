@@ -13,7 +13,7 @@ void appSetup(RivetServer app) {
     return RivetResponse.json({
       'id': req.params['id'],
       'name': 'John Doe',
-      'email': 'john@example.com'
+      'email': 'john@example.com',
     });
   });
 }
@@ -21,10 +21,6 @@ void appSetup(RivetServer app) {
 void main() {
   // Use all available cores
   final workers = Platform.numberOfProcessors;
-  
-  RivetServer.cluster(
-    builder: appSetup,
-    workers: workers,
-    port: 3000,
-  );
+
+  RivetServer.cluster(builder: appSetup, workers: workers, port: 3000);
 }

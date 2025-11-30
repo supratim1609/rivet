@@ -2,7 +2,7 @@
 library;
 
 /// Annotation to generate a Rivet API client
-/// 
+///
 /// Usage:
 /// ```dart
 /// @RivetClient(controllers: [UserController, ProductController])
@@ -11,12 +11,12 @@ library;
 class RivetClient {
   /// List of controller classes to include in the client
   final List<Type> controllers;
-  
+
   const RivetClient({this.controllers = const []});
 }
 
 /// Annotation to mark a class as a Rivet controller
-/// 
+///
 /// Usage:
 /// ```dart
 /// @RivetController(path: '/users')
@@ -25,7 +25,7 @@ class RivetClient {
 class RivetController {
   /// Base path for the controller
   final String path;
-  
+
   const RivetController({this.path = ''});
 }
 
@@ -33,7 +33,7 @@ class RivetController {
 class Route {
   final String method;
   final String path;
-  
+
   const Route(this.method, this.path);
 }
 

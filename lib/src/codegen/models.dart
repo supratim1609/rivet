@@ -41,8 +41,7 @@ class RouteDefinition {
   }
 
   @override
-  String toString() =>
-      'RouteDefinition($method $path -> $responseType)';
+  String toString() => 'RouteDefinition($method $path -> $responseType)';
 }
 
 /// Represents a Dart type/model definition

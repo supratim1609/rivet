@@ -96,7 +96,7 @@ MiddlewareHandler validate(Validator validator) {
     req.formFields.forEach((key, value) {
       data[key] = value;
     });
-    
+
     final errors = validator.validate(data);
 
     if (errors.isNotEmpty) {

@@ -6,9 +6,9 @@ import 'middleware.dart';
 
 class JWTPayload {
   final Map<String, dynamic> data;
-  
+
   JWTPayload(this.data);
-  
+
   String? get userId => data['userId'];
   String? get email => data['email'];
   List<String>? get roles => (data['roles'] as List?)?.cast<String>();
@@ -22,7 +22,7 @@ MiddlewareHandler jwt({
 }) {
   return (RivetRequest req, FutureOr<dynamic> Function() next) async {
     final authHeader = req.headers.value(header);
-    
+
     if (authHeader == null) {
       throw RivetException('No authorization header', statusCode: 401);
     }
@@ -36,21 +36,21 @@ MiddlewareHandler jwt({
     try {
       final jwt = JWT.verify(token, SecretKey(secret));
       final payload = JWTPayload(jwt.payload as Map<String, dynamic>);
-      
+
       // Check roles if required
       if (requiredRoles != null && requiredRoles.isNotEmpty) {
         final userRoles = payload.roles ?? [];
         final hasRole = requiredRoles.any((role) => userRoles.contains(role));
-        
+
         if (!hasRole) {
           throw RivetException('Insufficient permissions', statusCode: 403);
         }
       }
-      
+
       // Attach payload to request params
       req.params['__jwt_userId'] = payload.userId ?? '';
       req.params['__jwt_email'] = payload.email ?? '';
-      
+
       return await next();
     } on JWTExpiredException {
       throw RivetException('Token expired', statusCode: 401);
@@ -66,13 +66,7 @@ String generateJWT({
   required Map<String, dynamic> payload,
   Duration expiration = const Duration(hours: 24),
 }) {
-  final jwt = JWT(
-    payload,
-    issuer: 'rivet',
-  );
-  
-  return jwt.sign(
-    SecretKey(secret),
-    expiresIn: expiration,
-  );
+  final jwt = JWT(payload, issuer: 'rivet');
+
+  return jwt.sign(SecretKey(secret), expiresIn: expiration);
 }

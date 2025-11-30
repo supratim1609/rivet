@@ -10,7 +10,7 @@ void main() async {
   app.get('/user/:id', (req) {
     return RivetResponse.json({
       'id': req.params['id'],
-      'name': 'User ${req.params['id']}'
+      'name': 'User ${req.params['id']}',
     });
   });
 

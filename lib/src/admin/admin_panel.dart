@@ -1,12 +1,13 @@
 import 'dart:io';
 import 'package:rivet/rivet.dart';
+import '../utils/metrics.dart';
 
 /// Built-in Admin Panel for Rivet
 class AdminPanel {
   static void register(RivetServer app, {String prefix = '/admin'}) {
     // Serve admin UI
     app.get(prefix, (req) => _serveUI(req as RivetRequest));
-    
+
     // API endpoints
     app.get('$prefix/api/metrics', (req) => _getMetrics(req as RivetRequest));
     app.get('$prefix/api/routes', (req) => _getRoutes(req as RivetRequest));
@@ -30,7 +31,7 @@ class AdminPanel {
       'routes': [
         {'method': 'GET', 'path': '/'},
         {'method': 'POST', 'path': '/api/users'},
-      ]
+      ],
     });
   }
 

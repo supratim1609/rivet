@@ -1,5 +1,5 @@
 /// Example demonstrating the auto-generated Flutter client
-/// 
+///
 /// This shows how to use the code generation system
 library;
 
@@ -54,11 +54,7 @@ void main() {
   // LoginResponse type
   final loginResponseType = inference.inferFromMap('LoginResponse', {
     'token': 'jwt-token-here',
-    'user': {
-      'id': '123',
-      'name': 'John Doe',
-      'email': 'john@example.com',
-    },
+    'user': {'id': '123', 'name': 'John Doe', 'email': 'john@example.com'},
   });
 
   // Post type
@@ -66,10 +62,7 @@ void main() {
     'id': '1',
     'title': 'Hello World',
     'content': 'This is a post',
-    'author': {
-      'id': '123',
-      'name': 'John Doe',
-    },
+    'author': {'id': '123', 'name': 'John Doe'},
   });
 
   // Get all types
@@ -77,10 +70,7 @@ void main() {
 
   // Generate client
   final generator = ClientGenerator();
-  final clientCode = generator.generate(
-    routes: routes,
-    types: types,
-  );
+  final clientCode = generator.generate(routes: routes, types: types);
 
   // Print generated code
   print(clientCode);

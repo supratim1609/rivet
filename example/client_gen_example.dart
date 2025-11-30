@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:rivet/rivet.dart';
 
 part 'client_gen_example.g.dart';
@@ -22,7 +24,9 @@ class UserController {
 
 // Define the client to be generated
 @RivetClient(controllers: [UserController])
-class MyApiClient {}
+abstract class MyApiClient {
+  factory MyApiClient(String baseUrl, {http.Client? client}) = _MyApiClient;
+}
 
 void main() {
   print('Run "dart run build_runner build" to generate the client!');

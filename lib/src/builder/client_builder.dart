@@ -23,7 +23,7 @@ class ClientGeneratorBuilder extends GeneratorForAnnotation<RivetClient> {
     // Get controllers from annotation
     final controllersReader = annotation.read('controllers');
     final routes = <RouteDefinition>[];
-    
+
     if (controllersReader.isList) {
       final controllers = controllersReader.listValue;
       for (final controllerObject in controllers) {
@@ -47,7 +47,9 @@ class ClientGeneratorBuilder extends GeneratorForAnnotation<RivetClient> {
     final code = generator.generate(
       routes: routes,
       types: [],
-      className: element.name ?? 'RivetClient', // Handle null name
+      className:
+          '_${element.name ?? 'RivetClient'}', // Generate private implementation
+      implements: element.name,
     );
 
     return code;
@@ -68,11 +70,13 @@ class ClientGeneratorBuilder extends GeneratorForAnnotation<RivetClient> {
         // Extract parameters
         final pathParams = <String>[];
         final queryParams = <String, String>{};
-        
+
         // Use children to find parameters if getter is missing
         // This is a fallback for analyzer API changes
-        final parameters = method.children.where((e) => e.kind == ElementKind.PARAMETER);
-        
+        final parameters = method.children.where(
+          (e) => e.kind == ElementKind.PARAMETER,
+        );
+
         for (final p in parameters) {
           // p is Element, so we need to access name and type
           // Element has name (String?)
@@ -80,10 +84,10 @@ class ClientGeneratorBuilder extends GeneratorForAnnotation<RivetClient> {
           // So we need to cast to VariableElement or similar if possible
           // But if we can't name the type, we can't cast.
           // However, we can use dynamic or check properties.
-          
+
           final name = p.name ?? '';
           String typeName = 'dynamic';
-          
+
           // Try to get type string
           // In analyzer, most elements that have a type implement TypeDefinedElement or similar
           // Or we can try to cast to dynamic and access type
@@ -102,42 +106,44 @@ class ClientGeneratorBuilder extends GeneratorForAnnotation<RivetClient> {
           }
         }
 
-        routes.add(RouteDefinition(
-          method: routeAnnot.method,
-          path: routeAnnot.path,
-          pathParams: pathParams,
-          queryParams: queryParams,
-          responseType: method.returnType.toString(),
-          handlerName: method.name!, // Name is non-null for methods usually
-        ));
+        routes.add(
+          RouteDefinition(
+            method: routeAnnot.method,
+            path: routeAnnot.path,
+            pathParams: pathParams,
+            queryParams: queryParams,
+            responseType: method.returnType.toString(),
+            handlerName: method.name!, // Name is non-null for methods usually
+          ),
+        );
       }
     }
   }
 
   _RouteInfo? _getRouteAnnotation(MethodElement method) {
-    // Use TypeChecker.fromUrl to avoid runtime issues
-    // Note: Ensure the URL matches the package structure
-    const getChecker = TypeChecker.fromUrl('package:rivet/src/annotations.dart#Get');
-    const postChecker = TypeChecker.fromUrl('package:rivet/src/annotations.dart#Post');
-    const putChecker = TypeChecker.fromUrl('package:rivet/src/annotations.dart#Put');
-    const deleteChecker = TypeChecker.fromUrl('package:rivet/src/annotations.dart#Delete');
-
-    if (getChecker.hasAnnotationOf(method)) {
-      final annot = getChecker.firstAnnotationOf(method);
-      final path = annot?.getField('path')?.toStringValue() ?? '/';
-      return _RouteInfo('GET', path);
-    } else if (postChecker.hasAnnotationOf(method)) {
-      final annot = postChecker.firstAnnotationOf(method);
-      final path = annot?.getField('path')?.toStringValue() ?? '/';
-      return _RouteInfo('POST', path);
-    } else if (putChecker.hasAnnotationOf(method)) {
-      final annot = putChecker.firstAnnotationOf(method);
-      final path = annot?.getField('path')?.toStringValue() ?? '/';
-      return _RouteInfo('PUT', path);
-    } else if (deleteChecker.hasAnnotationOf(method)) {
-      final annot = deleteChecker.firstAnnotationOf(method);
-      final path = annot?.getField('path')?.toStringValue() ?? '/';
-      return _RouteInfo('DELETE', path);
+    // Check each annotation
+    for (final annot in method.metadata) {
+      final value = annot.computeConstantValue();
+      if (value == null) continue;
+      
+      final type = value.type;
+      if (type == null) continue;
+      
+      final typeName = type.element?.name;
+      
+      if (typeName == 'Get') {
+        final path = value.getField('path')?.toStringValue() ?? '/';
+        return _RouteInfo('GET', path);
+      } else if (typeName == 'Post') {
+        final path = value.getField('path')?.toStringValue() ?? '/';
+        return _RouteInfo('POST', path);
+      } else if (typeName == 'Put') {
+        final path = value.getField('path')?.toStringValue() ?? '/';
+        return _RouteInfo('PUT', path);
+      } else if (typeName == 'Delete') {
+        final path = value.getField('path')?.toStringValue() ?? '/';
+        return _RouteInfo('DELETE', path);
+      }
     }
     
     return null;
@@ -150,5 +156,5 @@ class _RouteInfo {
   _RouteInfo(this.method, this.path);
 }
 
-Builder clientBuilder(BuilderOptions options) => 
+Builder clientBuilder(BuilderOptions options) =>
     SharedPartBuilder([ClientGeneratorBuilder()], 'rivet_client');

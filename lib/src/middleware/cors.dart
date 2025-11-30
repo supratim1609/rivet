@@ -12,14 +12,14 @@ MiddlewareHandler cors({
     'PUT',
     'DELETE',
     'OPTIONS',
-    'PATCH'
+    'PATCH',
   ],
   List<String> headers = const [
     'Origin',
     'X-Requested-With',
     'Content-Type',
     'Accept',
-    'Authorization'
+    'Authorization',
   ],
   bool credentials = false,
 }) {
@@ -50,7 +50,7 @@ MiddlewareHandler cors({
     if (req.method == 'OPTIONS') {
       responseHeaders['Access-Control-Allow-Methods'] = methods.join(', ');
       responseHeaders['Access-Control-Allow-Headers'] = headers.join(', ');
-      
+
       return RivetResponse(
         null,
         statusCode: HttpStatus.noContent,
