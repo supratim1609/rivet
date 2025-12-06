@@ -10,6 +10,8 @@ import '../plugins/plugin.dart';
 import '../middleware/middleware.dart';
 import '../middleware/error_handler.dart';
 import '../middleware/json_parser.dart';
+import '../decorators/controller_scanner.dart';
+import '../decorators/validators.dart';
 import 'request.dart';
 import 'response.dart';
 import 'isolate_manager.dart';
@@ -19,6 +21,7 @@ class RivetServer {
   final Middleware _middleware = Middleware();
   final WebSocketManager _wsManager = WebSocketManager();
   final PluginManager _pluginManager = PluginManager();
+  final ControllerScanner _controllerScanner = ControllerScanner();
   HttpServer? _server;
 
   RivetServer() {
@@ -45,6 +48,64 @@ class RivetServer {
 
   // Create route group
   RouteGroup group(String prefix) => RouteGroup(prefix, _router);
+
+  /// Register a controller with decorator-based routing
+  void registerController(Object controller) {
+    final routes = _controllerScanner.scanController(controller);
+
+    for (final route in routes) {
+      // Create handler with validation
+      Handler handler = route.handler as Handler;
+
+      // Wrap with validation if validators exist
+      if (route.validators.isNotEmpty) {
+        handler = _wrapWithValidation(handler, route.validators);
+      }
+
+      // Wrap with middleware if exists
+      for (final mw in route.middleware.reversed) {
+        handler = _wrapWithMiddleware(handler, mw);
+      }
+
+      // Register route based on HTTP method
+      switch (route.method.toUpperCase()) {
+        case 'GET':
+          get(route.path, handler);
+        case 'POST':
+          post(route.path, handler);
+        case 'PUT':
+          _router.addRoute('PUT', route.path, handler);
+        case 'DELETE':
+          _router.addRoute('DELETE', route.path, handler);
+        case 'PATCH':
+          _router.addRoute('PATCH', route.path, handler);
+        default:
+          throw Exception('Unsupported HTTP method: ${route.method}');
+      }
+    }
+  }
+
+  /// Wrap handler with validation
+  Handler _wrapWithValidation(Handler handler, List<Validator> validators) {
+    return (req) async {
+      // Run all validators
+      for (final validator in validators) {
+        final error = validator.validate(req);
+        if (error != null) {
+          return RivetResponse.badRequest(error);
+        }
+      }
+      // All validations passed, call handler
+      return await handler(req);
+    };
+  }
+
+  /// Wrap handler with middleware
+  Handler _wrapWithMiddleware(Handler handler, MiddlewareHandler middleware) {
+    return (req) async {
+      return await middleware(req, () => handler(req));
+    };
+  }
 
   // WebSocket support
   void ws(String path, WebSocketHandler handler) {
