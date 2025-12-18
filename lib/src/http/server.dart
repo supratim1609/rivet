@@ -12,6 +12,8 @@ import '../middleware/error_handler.dart';
 import '../middleware/json_parser.dart';
 import '../decorators/controller_scanner.dart';
 import '../decorators/validators.dart';
+import '../auth/jwt_service.dart';
+import '../hot_reload/hot_reload_manager.dart';
 import 'request.dart';
 import 'response.dart';
 import 'isolate_manager.dart';
@@ -21,10 +23,12 @@ class RivetServer {
   final Middleware _middleware = Middleware();
   final WebSocketManager _wsManager = WebSocketManager();
   final PluginManager _pluginManager = PluginManager();
-  final ControllerScanner _controllerScanner = ControllerScanner();
+  late final ControllerScanner _controllerScanner;
   HttpServer? _server;
+  HotReloadManager? _hotReloadManager;
 
-  RivetServer() {
+  RivetServer({JwtService? jwtService}) {
+    _controllerScanner = ControllerScanner(jwtService: jwtService);
     // Default middleware for production-ready setup
     use(errorHandler);
     use(jsonParser);
@@ -115,14 +119,15 @@ class RivetServer {
         return RivetResponse(null); // Connection upgraded
       }
       return RivetResponse.badRequest('WebSocket upgrade required');
-    });
-  }
+  });}
 
   // Start listening
   Future<void> listen({
     int port = 8080,
     String address = '0.0.0.0',
     void Function()? onStarted,
+    bool hotReload = false,
+    String? watchDirectory,
   }) async {
     _server = await HttpServer.bind(
       InternetAddress(address),
@@ -131,6 +136,18 @@ class RivetServer {
     );
     onStarted?.call();
     print('RIVET 🚀 running on http://$address:$port');
+
+    // Start hot reload if enabled
+    if (hotReload) {
+      _hotReloadManager = HotReloadManager(
+        watchDirectory: watchDirectory ?? Directory.current.path,
+        onReload: () async {
+          // Gracefully close server before restart
+          await _server?.close(force: false);
+        },
+      );
+      await _hotReloadManager!.start();
+    }
 
     await for (final raw in _server!) {
       _handle(raw);

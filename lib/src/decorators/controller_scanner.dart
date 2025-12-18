@@ -5,10 +5,17 @@ import 'dart:mirrors';
 import '../annotations.dart';
 import '../http/response.dart';
 import '../middleware/middleware.dart';
+import '../utils/cache.dart';
+import '../auth/jwt_service.dart';
+import '../auth/auth_middleware.dart';
 import 'validators.dart';
 
 /// Scans a controller and extracts route definitions
 class ControllerScanner {
+  final JwtService? jwtService;
+
+  ControllerScanner({this.jwtService});
+
   /// Scan a controller instance and return route definitions
   List<RouteDefinition> scanController(Object controller) {
     final routes = <RouteDefinition>[];
@@ -66,8 +73,19 @@ class ControllerScanner {
       final instance = metadata.reflectee;
 
       if (instance is Auth) {
-        // Create auth middleware
-        middleware.add(_createAuthMiddleware(instance.roles));
+        // Create auth middleware using JWT service
+        if (jwtService == null) {
+          throw Exception(
+            '@Auth decorator requires JwtService to be provided to ControllerScanner',
+          );
+        }
+        middleware.add(
+          createAuthMiddleware(
+            jwtService: jwtService!,
+            requiredRoles: instance.roles.isEmpty ? null : instance.roles,
+            optional: instance.optional,
+          ),
+        );
       }
 
       if (instance is UseMiddleware) {
@@ -77,6 +95,11 @@ class ControllerScanner {
             middleware.add(mw);
           }
         }
+      }
+
+      if (instance is CacheResponse) {
+        // Add cache middleware
+        middleware.add(_createCacheMiddleware(instance.ttl, instance.key));
       }
     }
 
@@ -110,29 +133,35 @@ class ControllerScanner {
     return [];
   }
 
-  /// Create auth middleware from roles
-  MiddlewareHandler _createAuthMiddleware(List<String> roles) {
+  /// Create cache middleware
+  MiddlewareHandler _createCacheMiddleware(int ttlSeconds, String? customKey) {
     return (req, next) async {
-      // Basic auth check - can be enhanced
-      if (req.headers['authorization'] == null) {
-        return RivetResponse.unauthorized('Unauthorized');
+      // Generate cache key
+      final key = customKey ?? '${req.method}:${req.path}:${req.query}';
+
+      // Try to get from cache
+      final cached = await cache.get<RivetResponse>(key);
+      if (cached != null) {
+        return cached;
       }
 
-      // If roles specified, check user has required role
-      if (roles.isNotEmpty) {
-        // This is a placeholder - real implementation would decode JWT
-        // and check user roles
-        final userRoles = <String>[]; // Get from JWT/session
-        final hasRole = roles.any((role) => userRoles.contains(role));
-        if (!hasRole) {
-          return RivetResponse.forbidden('Forbidden');
-        }
+      // Execute handler
+      final response = await next();
+
+      // Cache successful responses only
+      if (response is RivetResponse && response.statusCode >= 200 && response.statusCode < 300) {
+        await cache.set(
+          key,
+          response,
+          ttl: Duration(seconds: ttlSeconds),
+        );
       }
 
-      return await next();
+      return response;
     };
   }
 }
+
 
 /// Internal class to hold route information
 class _RouteInfo {

@@ -1,11 +1,11 @@
-# Rivet Framework
+# Rivet Framework v2.0 🚀
 
 **The Ultimate Full-Stack Dart Framework**
 
 🚀 **1.8x Faster than Express** | 🔒 **Production-Ready** | 🎯 **Type-Safe** | ⚡ **Native Compilation**
 
 > **Note:** This is **Rivet for Dart**, a high-performance backend framework for Dart and Flutter.  
-> Not to be confused with [rivet.dev](https://rivet.dev), which is a TypeScript framework for stateful workloads.
+> Not to be confused with [rivet.dev](https://rivet.dev).
 
 ---
 
@@ -13,130 +13,82 @@
 
 Rivet is the **only Dart framework** that gives you:
 
-- ✅ **Single Language** - Dart everywhere (backend + Flutter frontend)
+- ✅ **Universal Client Gen** - Write backend, get type-safe client free
+- ✅ **Hot Reload** - Instant backend updates on file save
 - ✅ **Native Compilation** - Deploy a single executable (no runtime needed)
-- ✅ **Blazing Fast** - 24,277 req/sec on dynamic routes (1.8x faster than Express)
-- ✅ **Type-Safe** - End-to-end type safety
-- ✅ **Production-Ready** - Built-in auth, rate limiting, WebSockets, database support
+- ✅ **Blazing Fast** - 24,277 req/sec on dynamic routes
+- ✅ **Production-Ready** - Built-in auth (JWT/OAuth), rate limiting, caching
 
 ---
 
 ## Quick Start
 
+### 1. Create Server
+
 ```dart
+// lib/main.dart
 import 'package:rivet/rivet.dart';
+
+@RivetController('/api')
+class HelloController {
+  @Get('/hello')
+  String hello() => 'Hello World!';
+}
 
 void main() async {
   final app = RivetServer();
-
-  app.get('/hello', (req) {
-    return RivetResponse.json({'message': 'Hello, World!'});
-  });
-
-  await app.listen(port: 3000);
+  app.registerController(HelloController());
+  await app.listen(port: 3000, hotReload: true);
 }
 ```
 
-**Compile to native binary:**
+### 2. Run with Hot Reload 🔥
+
 ```bash
-dart compile exe server.dart -o server
-./server  # Instant startup!
+dart run rivet_dev.sh lib/main.dart
+```
+
+### 3. Generate Client 🎨
+
+```bash
+dart run rivet generate -o lib/client.dart
 ```
 
 ---
 
-## Features
+## v2.0 New Features 🔥
 
-### 🔒 Security & Authentication
-- **JWT Authentication** - Token validation with role-based access
-- **Rate Limiting** - Token bucket algorithm
-- **CORS** - Full cross-origin support
-- **Request Validation** - Schema validation with sanitization
+### 🎨 Universal Client Generation
+Stop writing API clients manually. Rivet scans your controllers and generates a type-safe Dart client.
 
-### ⚡ Performance
-- **WebSockets** - Real-time with rooms & broadcasting
-- **SSE Streaming** - Server-Sent Events
-- **Worker Isolates** - Multi-core request handling
-- **Connection Pooling** - Database connection reuse
+- **Any Dart App**: Works for CLI, Server, AngularDart.
+- **Flutter Ready**: Optional Riverpod integration with `--riverpod`.
+- **Type-Safe**: Methods, return types, and DTOs are preserved.
 
-### 🗄️ Database
-- **PostgreSQL** - Full adapter with connection pooling
-- **Query Builder** - Type-safe SQL construction
-- **Migrations** - Schema versioning
-
-### 🛠️ Developer Experience
-- **Hot Reload** - Auto-restart on file changes
-- **Request Logging** - Colored console + JSON structured logs
-- **Testing Utilities** - Integration test helpers
-- **Plugin System** - Extensible architecture
-
-### 📊 Production
-- **Metrics** - Prometheus-compatible endpoint
-- **Session Management** - Cookie-based with auto-cleanup
-- **Caching** - In-memory with TTL
-- **Docker Support** - Official images
-
----
-
-## Benchmarks
-
-| Framework | Simple JSON | Dynamic Routes |
-|-----------|-------------|----------------|
-| **Rivet** | 14,334 req/s | **15,696 req/s** ⭐ |
-| Node.js | 30,691 req/s | 9,967 req/s |
-| Express | 20,571 req/s | 4,674 req/s |
-
-**Rivet is 3.3x faster than Express on real-world dynamic routes!**
-
----
-
-## Examples
-
-### JWT Authentication
 ```dart
-app.use(jwt(
-  secret: 'your-secret',
-  requiredRoles: ['admin'],
-));
-
-app.get('/protected', (req) {
-  final userId = req.params['__jwt_userId'];
-  return RivetResponse.ok({'user': userId});
-});
+// Generated code usage
+final client = ApiClient();
+final message = await client.hello(); // Type-safe String!
 ```
 
-### WebSockets
+### 🔥 Hot Reload for Backend
+No more restarting the server. We built a custom file watcher that swaps your code instantly when you save.
+
+- **Smart Debouncing**: Handles rapid-fire saves.
+- **Graceful Restart**: Waits for DB connections to close.
+- **Leak-Free**: Process-based isolation ensures 100% cleanup.
+
+### 🎯 Decorator Routing
+Expressive, clean, and metadata-rich routing.
+
 ```dart
-app.ws('/chat', (conn) {
-  conn.join('room1');
-  
-  conn.messages.listen((msg) {
-    conn.broadcast('room1', {'message': msg});
-  });
-});
-```
-
-### Database
-```dart
-final db = await PostgresAdapter.connect(
-  host: 'localhost',
-  port: 5432,
-  database: 'mydb',
-  username: 'user',
-  password: 'pass',
-);
-
-final users = await db.query('SELECT * FROM users WHERE id = @id', 
-  substitutionValues: {'id': 1});
-```
-
-### Validation
-```dart
-final validator = Validator()
-  ..field('email', [RequiredRule(), EmailRule()])
-  ..field('password', [MinLengthRule(8)]);
-
-app.use(validate(validator));
+@RivetController('/users')
+class UserController {
+  @Post('/')
+  @Auth(roles: ['admin']) // Role-based security
+  @CacheResponse(ttl: 60) // Caching built-in
+  Future<User> create(RivetRequest req) async { ... }
+}
 ```
 
 ---
@@ -145,31 +97,31 @@ app.use(validate(validator));
 
 ```yaml
 dependencies:
-  rivet: ^1.0.0
+  rivet: ^2.0.0
 ```
-
----
-
-## Documentation
-
-- [Getting Started](https://rivet.dev/docs/getting-started)
-- [API Reference](https://rivet.dev/docs/api)
-- [Examples](https://github.com/rivet/examples)
 
 ---
 
 ## Deployment
 
-### Docker
+### Native Binary (Linux/Mac/Windows)
 ```bash
-docker build -t my-rivet-app .
-docker run -p 8080:8080 my-rivet-app
+dart compile exe bin/server.dart -o server
+./server  # Instant startup!
 ```
 
-### Native Binary
-```bash
-./scripts/build.sh
-./build/rivet_server
+### Docker
+```dockerfile
+FROM dart:stable AS build
+WORKDIR /app
+COPY . .
+RUN dart pub get
+RUN dart compile exe bin/server.dart -o server
+
+FROM scratch
+COPY --from=build /runtime/ /
+COPY --from=build /app/server /app/bin/
+CMD ["/app/bin/server"]
 ```
 
 ---

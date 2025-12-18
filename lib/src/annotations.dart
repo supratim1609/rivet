@@ -59,10 +59,15 @@ class Patch extends Route {
 
 /// Middleware Annotations
 
-/// Annotation to apply authentication middleware
+/// Annotation to apply authentication middleware with optional role-based authorization
 class Auth {
+  /// List of roles required to access this route (empty = any authenticated user)
   final List<String> roles;
-  const Auth({this.roles = const []});
+  
+  /// If true, authentication is optional (validates token if present, but doesn't require it)
+  final bool optional;
+  
+  const Auth({this.roles = const [], this.optional = false});
 }
 
 /// Annotation to apply custom middleware
@@ -73,7 +78,7 @@ class UseMiddleware {
 
 /// Validation Annotations
 
-/// Annotation to apply validators to a route
+/// Annotation to apply validation to route
 class Validate {
   final List<dynamic> validators;
   const Validate(this.validators);
@@ -123,4 +128,13 @@ class Max {
   final num value;
   final String? message;
   const Max(this.field, this.value, {this.message});
+}
+
+/// Cache Annotation
+
+/// Annotation to cache route responses
+class CacheResponse {
+  final int ttl; // Time to live in seconds
+  final String? key; // Custom cache key (optional)
+  const CacheResponse({this.ttl = 300, this.key});
 }

@@ -15,9 +15,6 @@ pubspec.lock
 *.exe
 *.so
 *.dylib
-benchmark/rivet_cluster
-benchmark/framework_cluster
-benchmark/rivet_single
 
 # OS
 .DS_Store
@@ -38,22 +35,49 @@ coverage/
 *.swo
 *~
 
-# Node (for benchmark comparison servers)
-node_modules/
-package-lock.json
-
 # Gemini artifacts (don't publish these)
 .gemini/
 
 # Generated files (optional, but good for library dev)
+lib/generated/
 # *.g.dart
 
 # Documentation
 doc/api/
 
-# Benchmarks
-dart_benchmark_results_*.md
-
 # Temporary test files
 test_relic_import.dart
 server_relic.dart
+*_test_temp.dart
+
+# ============================================
+# BENCHMARKS (Keep private for now)
+# ============================================
+benchmark/
+benchmark_results*.md
+dart_benchmark_results*.md
+
+# Node modules for benchmark servers
+node_modules/
+package-lock.json
+package.json
+
+# ============================================
+# SECURITY & SECRETS
+# ============================================
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+*.p12
+secrets/
+config/secrets.yaml
+
+# ============================================
+# BUILD & DEPLOYMENT
+# ============================================
+dist/
+release/
+*.tar.gz
+*.zip

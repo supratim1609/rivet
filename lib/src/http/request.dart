@@ -17,6 +17,9 @@ class RivetRequest {
   Map<String, List<String>> queryAll =
       {}; // all query params e.g., ?ids=1&ids=2
   Map<String, dynamic>? jsonBody; // parsed JSON from middleware
+  
+  /// Authenticated user data (populated by auth middleware)
+  Map<String, dynamic>? user;
 
   // Form data
   Map<String, String> formFields = {};

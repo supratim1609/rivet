@@ -12,6 +12,16 @@ export 'src/middleware/logger.dart';
 export 'src/middleware/jwt.dart';
 export 'src/middleware/static_handler.dart';
 export 'src/utils/exception.dart';
+export 'src/utils/cache.dart';
 export 'src/annotations.dart';
 export 'src/decorators/validators.dart';
-export 'src/annotations.dart'; // Export annotations
+
+// Auth exports
+export 'src/auth/jwt_service.dart';
+export 'src/auth/password_hasher.dart';
+export 'src/auth/oauth_provider.dart';
+export 'src/auth/auth_middleware.dart';
+
+// Hot reload exports
+export 'src/hot_reload/file_watcher.dart';
+export 'src/hot_reload/hot_reload_manager.dart';

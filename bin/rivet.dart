@@ -1,399 +1,174 @@
-#!/usr/bin/env dart
-
 import 'dart:io';
+import 'package:args/args.dart';
 
-void main(List<String> args) async {
-  if (args.isEmpty) {
-    printHelp();
+
+void main(List<String> arguments) async {
+  final parser = ArgParser()
+    ..addCommand('generate')
+    ..addFlag('help', abbr: 'h', negatable: false, help: 'Print this usage info.');
+
+  final generateParser = parser.commands['generate']!
+    ..addOption('output', abbr: 'o', defaultsTo: 'lib/client.dart', help: 'Output file path')
+    ..addOption('name', abbr: 'n', defaultsTo: 'ApiClient', help: 'Name of the generated class')
+    ..addOption('base-url', abbr: 'b', defaultsTo: 'http://localhost:3000', help: 'Default base URL')
+    ..addFlag('riverpod', help: 'Generate Riverpod providers (requires flutter_riverpod)', defaultsTo: false);
+
+  try {
+    final results = parser.parse(arguments);
+
+    if (results['help'] as bool) {
+      print('Rivet CLI Tool');
+      print('Usage: dart run rivet <command> [arguments]');
+      print('');
+      print('Commands:');
+      print('  generate    Generate a Dart API client from your controllers');
+      print('');
+      print('Generate Options:');
+      print(generateParser.usage);
+      return;
+    }
+
+    if (results.command?.name == 'generate') {
+      await _handleGenerate(results.command!);
+    } else {
+      print('Rivet CLI Tool');
+      print('Usage: dart run rivet <command> [arguments]');
+      print('Run "dart run rivet --help" for more information.');
+    }
+  } catch (e) {
+    print('Error: $e');
+    exit(1);
+  }
+}
+
+Future<void> _handleGenerate(ArgResults args) async {
+  print('🔨 Rivet Client Generator');
+  
+  final output = args['output'] as String;
+  final className = args['name'] as String;
+  final baseUrl = args['base-url'] as String;
+  final useRiverpod = args['riverpod'] as bool;
+
+  print('   Scanning project for controllers...');
+
+  // 1. Find all Dart files in lib/
+  final libDir = Directory('lib');
+  if (!await libDir.exists()) {
+    print('Error: lib/ directory not found. Are you in the root of your project?');
     exit(1);
   }
 
-  final command = args[0];
+  final dartFiles = await libDir
+      .list(recursive: true)
+      .where((entity) => entity is File && entity.path.endsWith('.dart'))
+      .cast<File>()
+      .toList();
 
-  switch (command) {
-    case 'create':
-      if (args.length < 2) {
-        print('Error: Project name required');
-        print('Usage: rivet create <project-name>');
-        exit(1);
-      }
-      await createProject(args[1]);
-      break;
-    case 'generate':
-    case 'g':
-      if (args.length < 2) {
-        print('Error: Type required');
-        print('Usage: rivet generate <type> [name]');
-        exit(1);
-      }
-      final type = args[1];
-      final name = args.length > 2 ? args[2] : '';
-      await generate(type, name);
-      break;
-    case 'help':
-    case '--help':
-    case '-h':
-      printHelp();
-      break;
-    default:
-      print('Unknown command: $command');
-      printHelp();
-      exit(1);
-  }
-}
-
-void printHelp() {
-  print('''
-Rivet CLI - The Ultimate Dart Backend Framework
-
-Usage:
-  rivet <command> [arguments]
-
-Commands:
-  create <name>              Create a new Rivet project
-  generate <type> [name]     Generate code
-    - controller <name>      Generate a controller
-    - middleware <name>      Generate middleware
-    - model <name>           Generate a model
-    - client                 Generate Flutter API client
-  help                       Show this help message
-
-Examples:
-  rivet create my-api
-  rivet generate controller users
-  rivet generate middleware auth
-  rivet generate client --output lib/api_client.dart
-''');
-}
-
-Future<void> createProject(String name) async {
-  print('🚀 Creating Rivet project: $name');
-
-  final dir = Directory(name);
-  if (await dir.exists()) {
-    print('❌ Error: Directory $name already exists');
+  if (dartFiles.isEmpty) {
+    print('Error: No Dart files found in lib/');
     exit(1);
   }
 
-  await dir.create();
+  // 2. Generate a temporary runner script
+  // This script imports all project files so mirrors can find the controllers
+  final runnerFile = File('.rivet_gen_runner.dart');
+  final buffer = StringBuffer();
 
-  // Create directory structure
-  await Directory('$name/lib').create();
-  await Directory('$name/lib/controllers').create();
-  await Directory('$name/lib/middleware').create();
-  await Directory('$name/lib/models').create();
-  await Directory('$name/test').create();
-
-  // Create pubspec.yaml
-  await File('$name/pubspec.yaml').writeAsString('''
-name: $name
-description: A Rivet backend application
-version: 1.0.0
-
-environment:
-  sdk: ^3.0.0
-
-dependencies:
-  rivet: ^1.0.0
-
-dev_dependencies:
-  test: ^1.24.0
-''');
-
-  // Create main server file
-  await File('$name/lib/server.dart').writeAsString('''
-import 'package:rivet/rivet.dart';
-
-void main() async {
-  final app = RivetServer();
-
-  // Middleware
-  app.use(cors());
-  app.use(requestLogger());
-
-  // Routes
-  app.get('/', (req) {
-    return RivetResponse.json({'message': 'Welcome to $name!'});
-  });
-
-  await app.listen(port: 3000);
-}
-''');
-
-  // Create README
-  await File('$name/README.md').writeAsString('''
-# $name
-
-A Rivet backend application.
-
-## Getting Started
-
-```bash
-dart run lib/server.dart
-```
-
-## Build
-
-```bash
-dart compile exe lib/server.dart -o build/server
-```
-''');
-
-  print('✅ Project created successfully!');
-  print('');
-  print('Next steps:');
-  print('  cd $name');
-  print('  dart pub get');
-  print('  dart run lib/server.dart');
-}
-
-Future<void> generate(String type, String name) async {
-  switch (type) {
-    case 'controller':
-      await generateController(name);
-      break;
-    case 'middleware':
-      await generateMiddleware(name);
-      break;
-    case 'model':
-      await generateModel(name);
-      break;
-    case 'client':
-      await generateClient();
-      break;
-    default:
-      print('Unknown type: $type');
-      print('Available types: controller, middleware, model, client');
-      exit(1);
-  }
-}
-
-Future<void> generateController(String name) async {
-  final fileName = 'lib/controllers/${name}_controller.dart';
-  final className = '${name[0].toUpperCase()}${name.substring(1)}Controller';
-
-  await File(fileName).writeAsString('''
-import 'package:rivet/rivet.dart';
-
-class $className {
-  static void register(RivetServer app) {
-    app.get('/$name', index);
-    app.get('/$name/:id', show);
-    app.post('/$name', create);
-    app.put('/$name/:id', update);
-    app.delete('/$name/:id', destroy);
+  buffer.writeln("import 'dart:mirrors';");
+  buffer.writeln("import 'dart:io';");
+  buffer.writeln("import 'package:rivet/rivet.dart';");
+  buffer.writeln("import 'package:rivet/src/codegen/metadata_extractor.dart';");
+  buffer.writeln("import 'package:rivet/src/codegen/dart_client_generator.dart';");
+  buffer.writeln();
+  
+  // Import all user files
+  // We use relative paths from project root
+  for (final file in dartFiles) {
+    // Convert file path to package import or relative import
+    // For simplicity in this runner, we'll relative imports, but we need to handle the fact
+    // that the runner is in the root.
+    buffer.writeln("import '${file.path}';");
   }
 
-  static RivetResponse index(RivetRequest req) {
-    return RivetResponse.json({'message': 'List all $name'});
+  buffer.writeln();
+  buffer.writeln("void main() async {");
+  buffer.writeln("  print('   🔍 Analyzing metadata...');");
+  buffer.writeln("  final controllers = <ControllerMetadata>[];");
+  buffer.writeln("  final extractor = ControllerMetadataExtractor();");
+  buffer.writeln();
+  buffer.writeln("  // Scan all loaded libraries for classes with @RivetController");
+  buffer.writeln("  final mirrorSystem = currentMirrorSystem();");
+  buffer.writeln("  ");
+  buffer.writeln("  for (final library in mirrorSystem.libraries.values) {");
+  buffer.writeln("    for (final declaration in library.declarations.values) {");
+  buffer.writeln("      if (declaration is ClassMirror) {");
+  buffer.writeln("        bool isController = false;");
+  buffer.writeln("        for (final metadata in declaration.metadata) {");
+  buffer.writeln("          if (metadata.reflectee is RivetController) {");
+  buffer.writeln("            isController = true;");
+  buffer.writeln("            break;");
+  buffer.writeln("          }");
+  buffer.writeln("        }");
+  buffer.writeln("        ");
+  buffer.writeln("        if (isController) {");
+  buffer.writeln("          try {");
+  buffer.writeln("            // We need to instantiate the controller to extract metadata");
+  buffer.writeln("            // This assumes a default constructor exists");
+  buffer.writeln("            // In a real framework we might use valid static analysis,");
+  buffer.writeln("            // but for this v2.0 feature we instantiate.");
+  buffer.writeln("            final instance = declaration.newInstance(Symbol(''), []).reflectee;");
+  buffer.writeln("            print('   Found controller: \${MirrorSystem.getName(declaration.simpleName)}');");
+  buffer.writeln("            controllers.add(extractor.extractFromController(instance));");
+  buffer.writeln("          } catch (e) {");
+  buffer.writeln("            print('   Warning: Could not check \${MirrorSystem.getName(declaration.simpleName)}: \$e');");
+  buffer.writeln("          }");
+  buffer.writeln("        }");
+  buffer.writeln("      }");
+  buffer.writeln("    }");
+  buffer.writeln("  }");
+  buffer.writeln();
+  buffer.writeln("  if (controllers.isEmpty) {");
+  buffer.writeln("    print('   ⚠️ No controllers found.');");
+  buffer.writeln("    return;");
+  buffer.writeln("  }");
+  buffer.writeln();
+  buffer.writeln("  print('   🚀 Generating code...');");
+  buffer.writeln("  final generator = DartClientGenerator(");
+  buffer.writeln("    controllers: controllers,");
+  buffer.writeln("    className: '$className',");
+  buffer.writeln("    baseUrl: '$baseUrl',");
+  buffer.writeln("    includeRiverpod: $useRiverpod,");
+  buffer.writeln("  );");
+  buffer.writeln();
+  buffer.writeln("  final code = generator.generate();");
+  buffer.writeln("  final file = File('$output');");
+  buffer.writeln("  await file.parent.create(recursive: true);");
+  buffer.writeln("  await file.writeAsString(code);");
+  buffer.writeln("  print('   ✅ Generated client in $output');");
+  buffer.writeln("}");
+
+  await runnerFile.writeAsString(buffer.toString());
+
+  // 3. Run the temporary script
+  print('   Running generation script...');
+  // We need to include the current package in specific ways if not careful, 
+  // but 'dart run file.dart' generally works if pubspec is set up.
+  
+  final process = await Process.start('dart', ['run', runnerFile.path]);
+  stdout.addStream(process.stdout);
+  stderr.addStream(process.stderr);
+  
+  final exitCode = await process.exitCode;
+  
+  // 4. Cleanup
+  if (await runnerFile.exists()) {
+    await runnerFile.delete();
   }
-
-  static RivetResponse show(RivetRequest req) {
-    final id = req.params['id'];
-    return RivetResponse.json({'message': 'Show $name', 'id': id});
+  
+  if (exitCode == 0) {
+    print('✨ Done!');
+  } else {
+    print('❌ Generation failed with exit code $exitCode');
+    exit(exitCode);
   }
-
-  static RivetResponse create(RivetRequest req) {
-    return RivetResponse.created({'message': '$name created'});
-  }
-
-  static RivetResponse update(RivetRequest req) {
-    final id = req.params['id'];
-    return RivetResponse.json({'message': '$name updated', 'id': id});
-  }
-
-  static RivetResponse destroy(RivetRequest req) {
-    final id = req.params['id'];
-    return RivetResponse.noContent();
-  }
-}
-''');
-
-  print('✅ Controller created: $fileName');
-}
-
-Future<void> generateMiddleware(String name) async {
-  final fileName = 'lib/middleware/${name}_middleware.dart';
-
-  await File(fileName).writeAsString('''
-import 'dart:async';
-import 'package:rivet/rivet.dart';
-
-MiddlewareHandler ${name}Middleware() {
-  return (RivetRequest req, FutureOr<dynamic> Function() next) async {
-    // Add your middleware logic here
-    print('[${name.toUpperCase()}] Processing request');
-    
-    return await next();
-  };
-}
-''');
-
-  print('✅ Middleware created: $fileName');
-}
-
-Future<void> generateModel(String name) async {
-  final fileName = 'lib/models/${name}_model.dart';
-  final className = '${name[0].toUpperCase()}${name.substring(1)}';
-
-  await File(fileName).writeAsString('''
-class $className {
-  final int? id;
-  final String name;
-  final DateTime createdAt;
-
-  $className({
-    this.id,
-    required this.name,
-    DateTime? createdAt,
-  }) : createdAt = createdAt ?? DateTime.now();
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'createdAt': createdAt.toIso8601String(),
-    };
-  }
-
-  factory $className.fromJson(Map<String, dynamic> json) {
-    return $className(
-      id: json['id'],
-      name: json['name'],
-      createdAt: DateTime.parse(json['createdAt']),
-    );
-  }
-}
-''');
-
-  print('✅ Model created: $fileName');
-}
-
-Future<void> generateClient() async {
-  print('🔍 Generating Flutter API client...');
-
-  final outputPath = 'lib/api_client.dart';
-
-  final clientCode =
-      '''
-// AUTO-GENERATED CODE - DO NOT EDIT
-// Generated by Rivet Code Generator
-// Generated at: ${DateTime.now()}
-
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-
-/// Auto-generated API client for your Rivet backend
-/// 
-/// Usage:
-/// ```dart
-/// final client = RivetClient('http://localhost:3000');
-/// final result = await client.get('/endpoint');
-/// ```
-class RivetClient {
-  final String baseUrl;
-  final http.Client _client;
-  final Map<String, String> _defaultHeaders;
-
-  RivetClient(
-    this.baseUrl, {
-    http.Client? client,
-    Map<String, String>? defaultHeaders,
-  })  : _client = client ?? http.Client(),
-        _defaultHeaders = defaultHeaders ?? {};
-
-  /// Make a GET request
-  Future<Map<String, dynamic>> get(String path, {Map<String, String>? queryParams}) async {
-    var url = Uri.parse('\\\$baseUrl\\\$path');
-    
-    if (queryParams != null && queryParams.isNotEmpty) {
-      url = url.replace(queryParameters: queryParams);
-    }
-
-    final headers = {..._defaultHeaders};
-    final response = await _client.get(url, headers: headers);
-
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      return jsonDecode(response.body) as Map<String, dynamic>;
-    } else {
-      throw RivetClientException(response.statusCode, response.body);
-    }
-  }
-
-  /// Make a POST request
-  Future<Map<String, dynamic>> post(String path, {Map<String, dynamic>? body}) async {
-    final url = Uri.parse('\\\$baseUrl\\\$path');
-    final headers = {..._defaultHeaders, 'Content-Type': 'application/json'};
-
-    final response = await _client.post(
-      url,
-      headers: headers,
-      body: body != null ? jsonEncode(body) : null,
-    );
-
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      return jsonDecode(response.body) as Map<String, dynamic>;
-    } else {
-      throw RivetClientException(response.statusCode, response.body);
-    }
-  }
-
-  /// Make a PUT request
-  Future<Map<String, dynamic>> put(String path, {Map<String, dynamic>? body}) async {
-    final url = Uri.parse('\\\$baseUrl\\\$path');
-    final headers = {..._defaultHeaders, 'Content-Type': 'application/json'};
-
-    final response = await _client.put(
-      url,
-      headers: headers,
-      body: body != null ? jsonEncode(body) : null,
-    );
-
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      return jsonDecode(response.body) as Map<String, dynamic>;
-    } else {
-      throw RivetClientException(response.statusCode, response.body);
-    }
-  }
-
-  /// Make a DELETE request
-  Future<void> delete(String path) async {
-    final url = Uri.parse('\\\$baseUrl\\\$path');
-    final headers = {..._defaultHeaders};
-
-    final response = await _client.delete(url, headers: headers);
-
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw RivetClientException(response.statusCode, response.body);
-    }
-  }
-
-  /// Close the HTTP client
-  void close() {
-    _client.close();
-  }
-}
-
-/// Exception thrown when an API request fails
-class RivetClientException implements Exception {
-  final int statusCode;
-  final String body;
-
-  RivetClientException(this.statusCode, this.body);
-
-  @override
-  String toString() => 'RivetClientException(\\\$statusCode): \\\$body';
-}
-''';
-
-  await File(outputPath).writeAsString(clientCode);
-
-  print('✅ Client generated: \$outputPath');
-  print('');
-  print('Usage in your Flutter app:');
-  print("  final client = RivetClient('http://localhost:3000');");
-  print("  final data = await client.get('/api/users');");
-  print('');
-  print('💡 Tip: Add http package to your Flutter app:');
-  print('  flutter pub add http');
 }
