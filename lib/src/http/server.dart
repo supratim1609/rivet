@@ -10,6 +10,10 @@ import '../plugins/plugin.dart';
 import '../middleware/middleware.dart';
 import '../middleware/error_handler.dart';
 import '../middleware/json_parser.dart';
+import '../decorators/controller_scanner.dart';
+import '../decorators/validators.dart';
+import '../auth/jwt_service.dart';
+import '../hot_reload/hot_reload_manager.dart';
 import 'request.dart';
 import 'response.dart';
 import 'isolate_manager.dart';
@@ -19,9 +23,12 @@ class RivetServer {
   final Middleware _middleware = Middleware();
   final WebSocketManager _wsManager = WebSocketManager();
   final PluginManager _pluginManager = PluginManager();
+  late final ControllerScanner _controllerScanner;
   HttpServer? _server;
+  HotReloadManager? _hotReloadManager;
 
-  RivetServer() {
+  RivetServer({JwtService? jwtService}) {
+    _controllerScanner = ControllerScanner(jwtService: jwtService);
     // Default middleware for production-ready setup
     use(errorHandler);
     use(jsonParser);
@@ -46,6 +53,64 @@ class RivetServer {
   // Create route group
   RouteGroup group(String prefix) => RouteGroup(prefix, _router);
 
+  /// Register a controller with decorator-based routing
+  void registerController(Object controller) {
+    final routes = _controllerScanner.scanController(controller);
+
+    for (final route in routes) {
+      // Create handler with validation
+      Handler handler = route.handler as Handler;
+
+      // Wrap with validation if validators exist
+      if (route.validators.isNotEmpty) {
+        handler = _wrapWithValidation(handler, route.validators);
+      }
+
+      // Wrap with middleware if exists
+      for (final mw in route.middleware.reversed) {
+        handler = _wrapWithMiddleware(handler, mw);
+      }
+
+      // Register route based on HTTP method
+      switch (route.method.toUpperCase()) {
+        case 'GET':
+          get(route.path, handler);
+        case 'POST':
+          post(route.path, handler);
+        case 'PUT':
+          _router.addRoute('PUT', route.path, handler);
+        case 'DELETE':
+          _router.addRoute('DELETE', route.path, handler);
+        case 'PATCH':
+          _router.addRoute('PATCH', route.path, handler);
+        default:
+          throw Exception('Unsupported HTTP method: ${route.method}');
+      }
+    }
+  }
+
+  /// Wrap handler with validation
+  Handler _wrapWithValidation(Handler handler, List<Validator> validators) {
+    return (req) async {
+      // Run all validators
+      for (final validator in validators) {
+        final error = validator.validate(req);
+        if (error != null) {
+          return RivetResponse.badRequest(error);
+        }
+      }
+      // All validations passed, call handler
+      return await handler(req);
+    };
+  }
+
+  /// Wrap handler with middleware
+  Handler _wrapWithMiddleware(Handler handler, MiddlewareHandler middleware) {
+    return (req) async {
+      return await middleware(req, () => handler(req));
+    };
+  }
+
   // WebSocket support
   void ws(String path, WebSocketHandler handler) {
     _router.get(path, (req) async {
@@ -54,14 +119,15 @@ class RivetServer {
         return RivetResponse(null); // Connection upgraded
       }
       return RivetResponse.badRequest('WebSocket upgrade required');
-    });
-  }
+  });}
 
   // Start listening
   Future<void> listen({
     int port = 8080,
     String address = '0.0.0.0',
     void Function()? onStarted,
+    bool hotReload = false,
+    String? watchDirectory,
   }) async {
     _server = await HttpServer.bind(
       InternetAddress(address),
@@ -70,6 +136,18 @@ class RivetServer {
     );
     onStarted?.call();
     print('RIVET 🚀 running on http://$address:$port');
+
+    // Start hot reload if enabled
+    if (hotReload) {
+      _hotReloadManager = HotReloadManager(
+        watchDirectory: watchDirectory ?? Directory.current.path,
+        onReload: () async {
+          // Gracefully close server before restart
+          await _server?.close(force: false);
+        },
+      );
+      await _hotReloadManager!.start();
+    }
 
     await for (final raw in _server!) {
       _handle(raw);

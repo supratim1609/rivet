@@ -68,4 +68,13 @@ class RivetResponse {
   /// 500 Internal Server Error
   factory RivetResponse.internalError(String message) =>
       RivetResponse.json({'error': message}, statusCode: 500);
+
+  /// 302 Redirect
+  factory RivetResponse.redirect(String location) {
+    return RivetResponse(
+      '',
+      statusCode: 302,
+      headers: {'Location': location},
+    );
+  }
 }
