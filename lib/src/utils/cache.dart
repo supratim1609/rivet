@@ -2,7 +2,7 @@
 library;
 
 import 'dart:async';
-import 'dart:collection';
+// import 'dart:collection';
 
 /// Cache entry with expiration
 class _CacheEntry<T> {
