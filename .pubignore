@@ -1,0 +1,15 @@
+# Exclude generated code that may depend on Flutter
+lib/generated/
+
+# Exclude benchmark results and scripts
+benchmark/
+
+# Exclude implementation plans and brain dump
+.gemini/
+
+# Exclude local dev scripts
+rivet_dev.sh
+scripts/
+
+# Exclude temporary test files
+test/hot_reload/stress_hot_reload.dart
